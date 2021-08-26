@@ -1,0 +1,27 @@
+{
+  "name": "chat_bot_and_donate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amuname/CHAT_BOT_AND_DONATE.git"
+  },
+  "keywords": [
+    "chat_bot"
+  ],
+  "author": "me",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amuname/CHAT_BOT_AND_DONATE/issues"
+  },
+  "homepage": "https://github.com/amuname/CHAT_BOT_AND_DONATE#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongodb": "^4.1.0",
+    "telegraf": "^4.4.1"
+  }
+}
