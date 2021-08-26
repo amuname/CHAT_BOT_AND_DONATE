@@ -1,0 +1,1 @@
+module.exports = token = '1049537673:AAHQXK5cSSYsZhACGr6kCDFzzh0kSfldEGY'
