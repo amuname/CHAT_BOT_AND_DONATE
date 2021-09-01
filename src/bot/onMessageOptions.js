@@ -11,17 +11,17 @@ async function onMessagePromiseOptions(text,chat_id,ctx,res,rej){
 				case start.test(text) : 
 					const buttons = start_buttons
 
-					const what = await mLogic.bdGet({id:213})
+					mLogic.bdGet({id:213}).then(async (e)=>{
 
-					console.log(what)
+						const keyboard = await inlineButtonsKeyBoard(buttons)
 
-					const keyboard = await inlineButtonsKeyBoard(buttons)
+						// await bd.write message?)) or smth
+						// await this.telegram.callApi('sendMessage', { chat_id, text:'asa'})
+						console.log('\r\n'+e+'\r\n')
 
-					// await bd.write message?)) or smth
-					// await this.telegram.callApi('sendMessage', { chat_id, text:'asa'})
-					console.log('\r\ndvsdvsvw\r\n')
+						// res(await this.telegram.sendMessage(chat_id,'hello there',keyboard))
 
-					res(await this.telegram.sendMessage(chat_id,'hello there',keyboard))
+					})
 					//
 					break
 				case start_regexp.test(text) : 
