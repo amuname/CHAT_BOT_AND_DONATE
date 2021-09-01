@@ -1,20 +1,20 @@
 'use strict'
-const Bot = require('./bot/bot.js')
+const botFuncs = require('./bot/bot.js')
+const {Telegraf} = require('telegraf')
 const token = require('./bot/token.js')
 const bd = require('./bd/mongo.js')
 
 
-const BOT = new Bot(token)
-
+const Bot = new Telegraf(token)
 
 // BOT.getUpdates().then(e=>console.log(e))
 
-BOT.on('message',
-	(ctx)=>BOT.onMessage(ctx)
+Bot.on('message',
+	(ctx)=>botFuncs.onMessage(ctx,Bot)
 )
-BOT.on('callback_query',function(){
+Bot.on('callback_query',function(){
 	
 })
 
-BOT.launch()
+Bot.launch()
 
