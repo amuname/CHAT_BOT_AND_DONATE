@@ -1,4 +1,6 @@
 const {inlineButtonsKeyBoard,start_buttons} = require('./buttons.js')
+const mLogic = require('./../bd/mongo.js') // '..' - backward directory
+
 
 async function onMessagePromiseOptions(text,chat_id,ctx,res,rej){
 	
@@ -8,6 +10,10 @@ async function onMessagePromiseOptions(text,chat_id,ctx,res,rej){
 	switch (true){
 				case start.test(text) : 
 					const buttons = start_buttons
+
+					const what = await mLogic.bdGet({id:213})
+
+					console.log(what)
 
 					const keyboard = await inlineButtonsKeyBoard(buttons)
 
