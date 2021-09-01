@@ -23,12 +23,12 @@ async function main(method,filter) {
 	const db = client.db(dbName)
 	const collection = db.collection(collections.bot_companies)
 	// the following code examples can be pasted here...
-	method(filter,collection)
+	await method(filter,collection)
 
 	return 'done.'
 }
 
-async function bdGet(filter){
+async function bdGet(filter){ //  переделать, не работает ничего
 	let result,error
 
 	main(bdGetOne,filter)
@@ -40,7 +40,7 @@ async function bdGet(filter){
 }
 
 async function bdGetOne(filter,collection){
-	return collection.findOne(filter)
+	collection.findOne(filter)
 }
 
 module.exports = {
