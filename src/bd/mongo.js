@@ -22,26 +22,30 @@ async function main(method,filter) {
 	console.log('Connected successfully to server')
 	const db = client.db(dbName)
 	const collection = db.collection(collections.bot_companies)
-	method(filter,collection)
 	// the following code examples can be pasted here...
+	method(filter,collection)
 
 	return 'done.'
 }
 
 async function bdGet(filter){
+	let result,error
+
 	main(bdGetOne,filter)
-	  .then(console.log)
-	  .catch(console.error)
+	  .then( cursor => result = cursor)
+	  .catch( bdEerror => error = bdError)
 	  .finally(() => client.close())
+
+	return error || result
 }
 
 async function bdGetOne(filter,collection){
-	
+	return collection.findOne(filter)
 }
 
 module.exports = {
-	bdAdd,
-	bdUpdate,
+	// bdAdd,
+	// bdUpdate,
 	bdGet,
 }
 
