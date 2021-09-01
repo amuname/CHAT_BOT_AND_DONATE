@@ -1,15 +1,12 @@
 'use strict'
-const {Telegraf,Telegram} = require('telegraf')
+// const {Telegraf,Telegram} = require('telegraf')
 // const buttons = require('./buttons.js')
 const onMessagePromiseOptions = require('./onMessageOptions.js')
 const serverUrl = require('./serverUrl.js')
 
 // console.log(Telegraf)
 
-class Bot extends Telegraf {
-	constructor(token){
-		super(token)
-	}
+module.exports  = {
 
 	// tech methods
 
@@ -22,7 +19,7 @@ class Bot extends Telegraf {
 			chat_type : telegram_response.chat.type,	date : telegram_response.date,
 			text : telegram_response.text, 				lang_code : telegram_response.from.language_code
 		}
-	}
+	},
 
 	createDonationUrl(msg_info){
 		// using normal buttons, like text, not inline
@@ -36,12 +33,12 @@ class Bot extends Telegraf {
 		url = /*new URL(*/ch_id/*)*/	
 
 		return url
-	}
+	},
 
 
 	// callback methods
 
-	onMessage(ctx){
+	onMessage(ctx,bot){
 		const message_object = ctx.update.message
 		
 		//!!!!!!!!!!!!!!!!
@@ -56,9 +53,9 @@ class Bot extends Telegraf {
 		// this method send message and can be usefull in server callbacks
 		// 
 		// console.log('\r\nOnmessage',text)
-		return new Promise(onMessagePromiseOptions.bind(this,text,chat_id,ctx))
+		return new Promise(onMessagePromiseOptions.bind(bot,text,chat_id,ctx))
 
-	}
+	},
 
 
 	//!!!!
@@ -80,7 +77,7 @@ class Bot extends Telegraf {
 	deleteMsg(chat_id,msg_id){
 		if(typeof chat_id !== 'string' && typeof msg_id !== 'string') throw new TypeError('all must be strings')
 		this.bot.deleteMessage(chat_id,msg_id)
-	}
+	},
 
 	editTextMessage(new_text,chat_id,msg_id,inline_obj = {}){
 		inline_obj = inline_obj.reply_markup ? inline_obj : {}
@@ -88,7 +85,7 @@ class Bot extends Telegraf {
 		if(typeof new_text !== 'string' && typeof chat_id !== 'string' && typeof msg_id !== 'string' && typeof inline_obj !== 'object') throw new TypeError('one argument or more incorrect')
 		
 		this.bot.editMessageText(new_text,{chat_id,msg_id,inline_obj})
-	}
+	},
 
 	sendMsg(chat_id,msg_or_sticker_url,inline_obj = {}){
 		inline_obj = inline_obj.reply_markup ? inline_obj : {}
@@ -108,7 +105,7 @@ class Bot extends Telegraf {
 				else throw new Error('wrong msg type')
 			}
 		})
-	}
+	},
 
 
 
@@ -116,4 +113,4 @@ class Bot extends Telegraf {
 }
 
 
-module.exports = Bot
+
