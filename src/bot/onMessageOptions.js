@@ -11,15 +11,15 @@ async function onMessagePromiseOptions(text,chat_id,ctx,res,rej){
 				case start.test(text) : 
 					const buttons = start_buttons
 
-					mLogic.bdGet({id:213}).then(async (e)=>{
+					await mLogic.bdGet({id:ctx.from.id}).then(async (e)=>{
 
 						const keyboard = await inlineButtonsKeyBoard(buttons)
 
 						// await bd.write message?)) or smth
 						// await this.telegram.callApi('sendMessage', { chat_id, text:'asa'})
-						console.log('\r\n'+e+'\r\n')
+						console.log('mongo func\r\n','\r\n'+e+'\r\n')
 
-						// res(await this.telegram.sendMessage(chat_id,'hello there',keyboard))
+						res(await this.telegram.sendMessage(chat_id,'hello there',keyboard))
 
 					})
 					//
