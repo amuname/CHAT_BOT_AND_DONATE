@@ -14,33 +14,36 @@ const collections = {
 	bot_companies : 'bot_companies',
 	bot_curiers : 'bot_curiers',
 	bot_admins : 'bot_admins', //??? optional
+	bot_users : 'bot_users',
 }
 
-async function main(method,filter) {
-	// Use connect method to connect to the server
-	await client.connect()
-	console.log('Connected successfully to server')
-	const db = client.db(dbName)
-	const collection = db.collection(collections.bot_companies)
-	// the following code examples can be pasted here...
-	await method(filter,collection)
+async function bdGet(new_item){
+		
+		let response,error
 
-	return 'done.'
-}
+		await client.connect()
+		
+		const db = client.db(dbName)
 
-async function bdGet(filter){ //  переделать, не работает ничего
-	let result,error
+	try{
 
-	main(bdGetOne,filter)
-	  .then( cursor => result = cursor)
-	  .catch( bdEerror => error = bdError)
-	  .finally(() => client.close())
+        let collection = db.collection(collections.bot_users)
 
-	return error || result
-}
+        let query = { name: 'Volkswagen' }
 
-async function bdGetOne(filter,collection){
-	collection.findOne(filter)
+        let res = await collection.findOne(query)
+
+        response = res
+
+    } catch (err) {
+
+        error = err
+    } finally {
+
+        client.close()
+
+        return response || error
+    }
 }
 
 module.exports = {
