@@ -1,8 +1,14 @@
 'use strict'
-// const {Telegraf,Telegram} = require('telegraf')
-// const buttons = require('./buttons.js')
-const onMessagePromiseOptions = require('./onMessageOptions.js')
+// const onMessagePromiseOptions = require('./onMessageOptions.js')
 const serverUrl = require('./serverUrl.js')
+const {inlineButtonsKeyBoard,start_buttons} = require('./buttons.js')
+const mLogic = require('./../bd/mongo.js') // '..' - backward directory
+
+
+async function onMessagePromiseOptions(text,chat_id,ctx,res,rej){
+	
+	const start_regexp = /\/start .\d+/,
+	start = /\/start/
 
 // console.log(Telegraf)
 
@@ -17,7 +23,7 @@ module.exports  = {
 			is_bot : telegram_response.from.is_bot,		f_name : telegram_response.from.first_name,
 			chat_id : telegram_response.chat.id,		chat_f_name : telegram_response.chat.first_name,
 			chat_type : telegram_response.chat.type,	date : telegram_response.date,
-			text : telegram_response.text, 				lang_code : telegram_response.from.language_code
+			text : telegram_response.text, 				lang_code : telegram_response.from.language_code,
 		}
 	},
 
@@ -38,12 +44,12 @@ module.exports  = {
 
 	// callback methods
 
-	onMessage(ctx,bot){
+	onMessage(ctx){
 		const message_object = ctx.update.message
 		
 		//!!!!!!!!!!!!!!!!
 		//
-		//there bot buttons AYAYAYAYA!! check SWITCH 
+		//here bot buttons AYAYAYAYA!! check SWITCH 
 		//
 		//!!!!!!!!!!!!!!!!
 
@@ -53,7 +59,41 @@ module.exports  = {
 		// this method send message and can be usefull in server callbacks
 		// 
 		// console.log('\r\nOnmessage',text)
-		return new Promise(onMessagePromiseOptions.bind(bot,text,chat_id,ctx))
+		return new Promise(async function() {
+			const start_regexp = /\/start .\d+/,
+			start = /\/start/
+
+			switch (true){
+						case start.test(text) : 
+							const buttons = start_buttons
+
+							await mLogic.bdGet({id:ctx.from.id}).then(async (e)=>{
+
+								const keyboard = await inlineButtonsKeyBoard(buttons)
+
+								// await bd.write message?)) or smth
+								// await this.telegram.callApi('sendMessage', { chat_id, text:'asa'})
+								console.log('mongo func\r\n','\r\n'+e+'\r\n')
+
+								res(await this.telegram.sendMessage(chat_id,'hello there',keyboard))
+
+							})
+							//
+							break
+						case start_regexp.test(text) : 
+							//
+							//
+							break
+						case /a/.test(text) : 
+							//
+							res(this.telegram.sendMessage(chat_id,'wowowow'))
+							//
+							break
+						default :
+							return
+							// console.log('this is default condition')
+					}
+		})
 
 	},
 
