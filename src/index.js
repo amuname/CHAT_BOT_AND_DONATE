@@ -10,7 +10,7 @@ const Bot = new Telegraf(token)
 // BOT.getUpdates().then(e=>console.log(e))
 
 Bot.on('message',
-	(ctx)=>botFuncs.onMessage(ctx,Bot)
+	(ctx)=>botFuncs.onMessage(ctx)
 )
 Bot.on('callback_query',function(){
 	
