@@ -4,12 +4,6 @@ const serverUrl = require('./serverUrl.js')
 const {inlineButtonsKeyBoard,start_buttons} = require('./buttons.js')
 const mLogic = require('./../bd/mongo.js') // '..' - backward directory
 
-
-async function onMessagePromiseOptions(text,chat_id,ctx,res,rej){
-	
-	const start_regexp = /\/start .\d+/,
-	start = /\/start/
-
 // console.log(Telegraf)
 
 module.exports  = {
