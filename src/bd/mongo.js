@@ -17,7 +17,12 @@ const collections = {
 	bot_users : 'bot_users',
 }
 
-async function bdGet(new_item){
+module.exports = {
+
+
+	// START of bdGetUser
+
+	async bdGetUser(user_id){
 		
 		let response,error
 
@@ -25,30 +30,71 @@ async function bdGet(new_item){
 		
 		const db = client.db(dbName)
 
-	try{
+		try{
 
-        let collection = db.collection(collections.bot_users)
+	        const collection = db.collection(collections.bot_users)
 
-        let query = { name: 'Volkswagen' }
+	        const query = { user_id : user_id }
 
-        let res = await collection.findOne(query)
+	        const res = await collection.findOne(query)
 
-        response = res
+	        response = res
 
-    } catch (err) {
+	    } catch (err) {
 
-        error = err
-    } finally {
+	        error = err
+	    } finally {
 
-        client.close()
+	        await client.close()
 
-        return response || error
-    }
+	        return response
+	    }
+	},
+
+	// END of bdGetUser
+
+
+	// START of bdAddUser
+
+	async bdAddUser(user_object){
+
+
+		const user = await this.bdGet(user_object.id)
+
+		if (!user) {
+
+			let response,error
+
+			await client.connect()
+		
+			const db = client.db(dbName)
+
+			try{
+
+		        const collection = db.collection(collections.bot_users)
+
+		        const res = await collection.insertOne(user_object)
+
+		        response = res ? 'OK' : false
+
+		    } catch (err) {
+
+		        error = err
+		    } finally {
+
+		        await client.close()
+
+		        return response
+		    }
+
+		}
+
+	},
+
+	// END of bdAddUser
+
+
+
 }
 
-module.exports = {
-	// bdAdd,
-	// bdUpdate,
-	bdGet,
-}
 
