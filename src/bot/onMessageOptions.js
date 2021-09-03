@@ -7,6 +7,8 @@ async function onMessagePromiseOptions(text,chat_id,ctx,res,rej){
 	const start_regexp = /\/start .\d+/,
 	start = /\/start/
 
+	responseToReadableMessage(telegram_response)
+	
 	switch (true){
 				case start.test(text) : 
 					const buttons = start_buttons
