@@ -61,7 +61,7 @@ module.exports  = {
 				case start.test(text) : 
 					const buttons = start_buttons
 
-					const dbResponse =await mLogic.bdAddUser({
+					const dbStartResponse =await mLogic.bdAddUser({
 						user:{
 							id:sender_id,
 							lang:lang_code,
@@ -78,16 +78,16 @@ module.exports  = {
 							},
 						}
 					})
-					if(dbResponse=='OK'){
+					if(dbStartResponse=='OK'){
 
 						const keyboard = await inlineButtonsKeyBoard(buttons)
 
-						// console.log('mongo func\r\n','shood be "OK"\r\n'+dbResponse+'\r\n')
+						// console.log('mongo func\r\n','shood be "OK"\r\n'+dbStartResponse+'\r\n')
 
 						res(await bot.telegram.sendMessage(sender_id,'hello there',keyboard))
 
 					} 
-					if(dbResponse=='registred'){
+					if(dbStartResponse=='registred'){
 						res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command'))
 					}
 							
@@ -96,8 +96,19 @@ module.exports  = {
 							//
 							//
 					break
-				case /nothing/.test(text) : 
-							//
+				case /find member to chat/.test(text) : 
+
+					await ctx.deleteMessage(msg_id)
+
+					const dbStartSearch = await mLogic.bdOnlyUpdateMessage(sender_id,{
+						            		usr_msg:text,
+						            		time:date,
+						            	})
+
+					if (dbStartSearch){
+						res(await ctx.reply('Looking for HOT MILFS'))
+					}
+					else res(await ctx.reply('smth went wrong'))
 					// const keyboard = await inlineButtonsKeyBoard(start_buttons)
 					// const response = await mLogic.bdGetUser(sender_id)
 					// res(bot.telegram.sendMessage(chat_id,`u: ${response}`,keyboard))
