@@ -34,9 +34,15 @@ module.exports = {
 
 	        const collection = db.collection(collections.bot_users)
 
-	        const query = { user_id : user_id }
+	        const query = { 
+	        	user:{
+	        		id:user_id
+	        	}  
+	        }
 
-	        const res = await collection.findOne(query)
+	        const res = await collection.findOne({'user.id':1079919770})
+
+	        console.log(res)
 
 	        response = res
 
@@ -59,7 +65,7 @@ module.exports = {
 	async bdAddUser(user_object){
 
 
-		const user = await this.bdGet(user_object.id)
+		const user = await this.bdGetUser(user_object.id)
 
 		if (!user) {
 
@@ -88,6 +94,7 @@ module.exports = {
 		    }
 
 		}
+		return 'registred'
 
 	},
 
