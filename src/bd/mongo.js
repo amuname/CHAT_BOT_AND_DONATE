@@ -34,15 +34,9 @@ module.exports = {
 
 	        const collection = db.collection(collections.bot_users)
 
-	        const query = { 
-	        	user:{
-	        		id:user_id
-	        	}  
-	        }
+	        const res = await collection.findOne({'user.id':user_id})
 
-	        const res = await collection.findOne({'user.id':1079919770})
-
-	        console.log(res)
+	        // console.log(res.user.conversations_with.bot)
 
 	        response = res
 
@@ -65,8 +59,7 @@ module.exports = {
 	async bdAddUser(user_object){
 
 
-		const user = await this.bdGetUser(user_object.id)
-
+		const user = await this.bdGetUser(user_object.user.id)
 		if (!user) {
 
 			let response,error
@@ -99,6 +92,56 @@ module.exports = {
 	},
 
 	// END of bdAddUser
+
+
+	// START of bdOnlyUpdateMessage
+
+	async bdOnlyUpdateMessage(user_id,message_to_add){
+
+
+		const user_object = await this.bdGetUser(user_id)
+
+		const user_messages = user_object.user.conversations_with[user_object.user.chat_status].messages_sended
+
+		// console.log('updatefunc below =>\r\n',user_messages)
+		// user_messages.push(message_to_add)
+		console.log('AFTER PUSH()! below =>\r\n',user_messages)
+
+		// if (!user_object) {
+
+			let response,error
+
+			await client.connect()
+		
+			const db = client.db(dbName)
+
+			try{
+
+		        const collection = db.collection(collections.bot_users)
+
+		        const res = await collection.updateOne(
+		        	{'user.id':user_id},
+		        	{ $push: { 'user.conversations_with.bot.messages_sended' : message_to_add}}
+		        	)
+
+		        response = res ? 'OK' : false
+
+		    } catch (err) {
+
+		        error = err
+		    } finally {
+
+		        await client.close()
+
+		        return response
+		    }
+
+		// }
+		// return 'bad'
+
+	},
+
+	// END of bdOnlyUpdateMessage
 
 
 
