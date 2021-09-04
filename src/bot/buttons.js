@@ -23,7 +23,7 @@ const buttonBuilder = {
 			
 			res({
 			'reply_markup': {
-			    'inline_keyboard': array_of_keyboard_buttons 
+			    'keyboard': array_of_keyboard_buttons 
 			    }
 			})
 
@@ -31,9 +31,21 @@ const buttonBuilder = {
 	},
 	start_buttons : [
 					    [{  // if url_or_callback == true
-					        text: 'ya ya and what',
-					        callback_data: 'test'
-					    }]
+					        text: 'find member to chat',
+					        // callback_data: 'test'
+					    }],
+					    [{  // if url_or_callback == true
+					        text: 'read rules',
+					        // callback_data: 'test'
+					    },
+					    {  // if url_or_callback == true
+					        text: 'donate for VIP status',
+					        // callback_data: 'test'
+					    }],
+					    // [{  // if url_or_callback == true
+					    //     text: 'donate for VIP status',
+					    //     // callback_data: 'test'
+					    // }]
 					]
 
 
