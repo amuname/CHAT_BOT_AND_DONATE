@@ -1,7 +1,7 @@
 'use strict'
 // const onMessagePromiseOptions = require('./onMessageOptions.js')
 const serverUrl = require('./serverUrl.js')
-const {inlineButtonsKeyBoard,start_buttons} = require('./buttons.js')
+const {inlineButtonsKeyBoard,start_buttons,leave_buttons} = require('./buttons.js')
 const mLogic = require('./../bd/mongo.js') // '..' - backward directory
 
 // console.log(Telegraf)
@@ -54,68 +54,97 @@ module.exports  = {
 		// 
 		// console.log('\r\nOnmessage',text)
 		return new Promise(async (res,rej)=> {
+			const start_keyboard = await inlineButtonsKeyBoard(start_buttons)
+			const leave_butt = await inlineButtonsKeyBoard(leave_buttons)
 			const start_regexp = /\/start .\d+/,
 			start = /\/start/
 
+			const user_status = await mLogic.userStatus(sender_id)
+			if (user_status) {}
+
 			switch (true){
 				case start.test(text) : 
-					const buttons = start_buttons
 
-					const dbStartResponse =await mLogic.bdAddUser({
-						user:{
-							id:sender_id,
-							lang:lang_code,
-							chat_status:'bot',
-						    conversations_with: {
-						        ['bot']: {
-						            messages_sended: [
-						            	{
-						            		usr_msg:text,
-						            		time:date,
-						            	},
-						            ]
-						        },
-							},
+					if(user_status!==undefined || user_status!=='bot'){
+						return res(await bot.telegram.sendMessage(sender_id,'use buttons to leave queue or chat',leave_butt))
+					}
+					if(user_status===undefined ){
+						const dbStartResponse =await mLogic.bdAddUser({
+							user:{
+								id:sender_id,
+								lang:lang_code,
+								chat_status:'bot',
+					            messages_sended: [
+					            	{
+					            		to:'bot',
+					            		usr_msg:text,
+					            		time:date,
+					            	},
+					            ]
+							}
+						})	
+
+						if(dbStartResponse=='OK'){
+
+							// console.log('mongo func\r\n','shood be "OK"\r\n'+dbStartResponse+'\r\n')
+
+							res(await bot.telegram.sendMessage(sender_id,'hello there',start_keyboard))
+
 						}
-					})
-					if(dbStartResponse=='OK'){
-
-						const keyboard = await inlineButtonsKeyBoard(buttons)
-
-						// console.log('mongo func\r\n','shood be "OK"\r\n'+dbStartResponse+'\r\n')
-
-						res(await bot.telegram.sendMessage(sender_id,'hello there',keyboard))
-
-					} 
+					}
+					 
 					if(dbStartResponse=='registred'){
-						res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command'))
+						res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard))
 					}
 							
 					break
-				case start_regexp.test(text) : 
+				case start_regexp.test(text) && user_status =='bot' : 
 							//
 							//
 					break
-				case /find member to chat/.test(text) : 
+				case /find member to chat/.test(text) && user_status =='bot' : 
 
 					await ctx.deleteMessage(msg_id)
 
-					const dbStartSearch = await mLogic.bdOnlyUpdateMessage(sender_id,{
-						            		usr_msg:text,
-						            		time:date,
-						            	})
+					const updadte_queue_status = await mLogic.bdOnlyUpdateMessage(sender_id,{
+				            		to:'',
+				            		usr_msg:text,
+				            		time:date,
+				            	},'in_queue')
 
-					if (dbStartSearch){
-						res(await ctx.reply('Looking for HOT MILFS'))
+					if (updadte_queue_status){
+						res(await ctx.reply('Looking for HOT MILFS',leave_butt))
+						// function connectUsers started every 1-2 seconds=>
+						//=> from setInterval in index & connect users directly
 					}
 					else res(await ctx.reply('smth went wrong'))
-					// const keyboard = await inlineButtonsKeyBoard(start_buttons)
-					// const response = await mLogic.bdGetUser(sender_id)
-					// res(bot.telegram.sendMessage(chat_id,`u: ${response}`,keyboard))
-							//
+
+					break
+				case /Return to bot menu/.test(text) && user_status!=='bot' :
+					// только когда пользователь в чате или в поиске
+					// возварщает к меню бота
+					await mLogic.bdOnlyUpdateMessage(sender_id,{
+				            		to:'',
+				            		usr_msg:text,
+				            		time:date,
+				            	},'bot')
+
+					res(await bot.telegram.sendMessage(sender_id,'You`re in the bot menu now',start_keyboard))
+					break
+				case /.*/.test(text) && /in_queue/.test(user_status) :
+					// только когда пользователь в поиске
+					res(await bot.telegram.sendMessage(sender_id,`You already in queue...
+						Use buttons or /help command`,leave_butt))
+
+					break
+				case /.*/.test(text) && /^\d+$/.test(user_status) :
+					// только когда пользователь в чате с пользователем
+
+
 					break
 				default :
-					res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command'))
+				console.log('here!!!!!!!!!!!!!!!!!!!!!!!!')
+					res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard))
 					// console.log('this is default condition')
 			}
 		})
