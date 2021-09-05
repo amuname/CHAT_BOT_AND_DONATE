@@ -46,7 +46,13 @@ const buttonBuilder = {
 					    //     text: 'donate for VIP status',
 					    //     // callback_data: 'test'
 					    // }]
-					]
+					],
+	leave_buttons: [
+					    [{  // if url_or_callback == true
+					        text: 'Return to bot menu',
+					        // callback_data: 'test'
+					    }],
+					],
 
 
 
