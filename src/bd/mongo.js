@@ -101,7 +101,7 @@ module.exports = {
 		const user_object = await this.bdGetUser(user_id)
 
 		const user_messages_with = user_object.user.chat_status
-		message_to_add.to = user_messages_with
+		message_to_add.to = message_to_add.to !=='' ? message_to_add.to :  user_messages_with
 		// user_messages.push(message_to_add)
 		console.log('AFTER PUSH()! below =>\r\n',user_messages_with)
 
