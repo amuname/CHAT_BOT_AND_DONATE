@@ -60,7 +60,7 @@ module.exports  = {
 			start = /\/start/
 
 			const user_status = await mLogic.userStatus(sender_id)
-			if (user_status) {}
+			// if (user_status) {}
 
 			switch (true){
 				case start.test(text) : 
@@ -139,12 +139,35 @@ module.exports  = {
 					break
 				case /.*/.test(text) && /^\d+$/.test(user_status) :
 					// только когда пользователь в чате с пользователем
-
+					await mLogic.bdOnlyUpdateMessage(sender_id,{
+				            		to:user_status,
+				            		usr_msg:text,
+				            		time:date,
+				            	},user_status)
+					
+					res(await bot.telegram.sendMessage(user_status,text))
 
 					break
 				default :
-				console.log('here!!!!!!!!!!!!!!!!!!!!!!!!')
-					res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard))
+
+				const m = await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard)
+				console.log('here!!!!!!!!!!!!!!!!!!!!!!!!\r\n',m)
+				// m = {
+				//   message_id: 617,
+				//   from: {
+				//     id: 1049537673,
+				//     is_bot: true,
+				//     first_name: 'anywayineedit',
+				//     username: 'awini_bot'
+				//   },
+				//   chat: { id: 1079919770, first_name: 'alex', type: 'private' },
+				//   date: 1630955801,
+				//   text: 'Use buttons or /help command',
+				//   entities: [ { offset: 15, length: 5, type: 'bot_command' } ]
+				// }
+				//
+				//
+					res()
 					// console.log('this is default condition')
 			}
 		})
