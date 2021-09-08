@@ -18,13 +18,21 @@ module.exports  = {
 			chat_id : telegram_response.chat.id,		chat_f_name : telegram_response.chat.first_name,
 			chat_type : telegram_response.chat.type,	date : telegram_response.date,
 			text : telegram_response.text, 				lang_code : telegram_response.from.language_code,
+			// u need  {
+  			//	 file_id: 'AgACAgIAAxkBAAICfmE4_IaoMFLiQBb5FgTepvbdhYAcAAIetDEbvxzIST3toFg0cb4rAQADAgADeQADIAQ',
+			// }
+			// then get url like:
+			// https://api.telegram.org/file/bot<token>/<file_path>
+			photo : telegram_response?.photo,
+			//
+			video :[],
 		}
 	},
 
 	createDonationUrl(msg_info){
 		// using normal buttons, like text, not inline
 		const {msg_id,sender_id,is_bot,f_name,chat_id,
-			chat_f_name,chat_type,date,text,lang_code} = this.responseToReadableMessage(msg_info)
+			chat_f_name,chat_type,date,text,lang_code,photo} = this.responseToReadableMessage(msg_info)
 
 		const sID = serverUrl + '/donation?' + 'sender_id=' + sender_id,
 		lCode = sID + '&' + 'lang_code=' + lang_code,
@@ -48,7 +56,7 @@ module.exports  = {
 		//!!!!!!!!!!!!!!!!
 
 		const {msg_id,sender_id,is_bot,f_name,chat_id,
-			chat_f_name,chat_type,date,text,lang_code} = this.responseToReadableMessage(message_object)
+			chat_f_name,chat_type,date,text,lang_code,photo} = this.responseToReadableMessage(message_object)
 
 		// this method send message and can be usefull in server callbacks
 		// 
@@ -150,6 +158,8 @@ module.exports  = {
 					break
 				default :
 
+				console.log('\r\nUSER MSG\n',photo)
+
 				const m = await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard)
 				console.log('here!!!!!!!!!!!!!!!!!!!!!!!!\r\n',m)
 				// m = {
@@ -224,7 +234,16 @@ module.exports  = {
 		})
 	},
 
-
+	async intervalQuery(){
+		const users_update = await twoUsersToChat()
+		if (users_update instanceof Object) {
+			const {first_user,second_user} = users_update
+			const text = 'You`re in dialog now'
+			await this.telegram.sendMessage(first_user,text)
+			await this.telegram.sendMessage(second_user,text)
+		}
+		return
+	},	
 
 
 }
