@@ -171,6 +171,72 @@ module.exports = {
 	// END of userStatus
 
 
+	// START of twoUsersToChat
+
+	async twoUsersToChat(){
+		let response,error
+		await client.connect()
+		const db = client.db(dbName)
+		try{
+	        const collection = db.collection(collections.bot_users)
+	        const first_user_cursor = await collection.find({'user.chat_status':'in_queue'})
+	        const array_of_users_in_queue = await first_user_cursor.toArray()
+	        function randomUser(user_array){
+	        	const min = 0
+	        	const max = user_array.length-1
+	        	const index = Math.round(min + Math.random() * (max - min))
+	        	return user_array[index].user.id
+	        }
+	        const first_user = randomUser(array_of_users_in_queue)
+	        console.log(first_user)
+	        let second_user = 0
+	        //
+	        //
+	        // ВОТ ТУТ ПИЗДА
+	        //
+	        //
+	        if (array_of_users_in_queue.length !== 1 || array_of_users_in_queue.length !== 2){
+		        do {
+		        	second_user = randomUser(array_of_users_in_queue)
+
+		        } while(first_user === second_user && array_of_users_in_queue.length !== 1)
+	        } else {
+	        	if (array_of_users_in_queue.indexOf(first_user)!==0){
+	        		second_user = array_of_users_in_queue[0].user.id
+	        	} else {
+	        		if (array_of_users_in_queue.length == 1) {
+	        			await client.close()
+	        			return false
+	        		}
+	        		second_user = array_of_users_in_queue[1].user.id
+	        	}
+	        }
+
+	        const res1 = await collection.updateOne(
+		        	{'user.id':first_user},
+		        	{ $set: { 'user.chat_status' : second_user} }
+		        )
+
+	        const res2 = await collection.updateOne(
+		        	{'user.id':second_user},
+		        	{ $set: { 'user.chat_status' : first_user} }
+		        )
+	        
+	        response = res1 && res2 ? {first_user,second_user} : false
+
+	    } catch (err) {
+
+	        error = err
+	    } finally {
+
+	        await client.close()
+
+	        return response
+	    }
+	},
+
+	// END of twoUsersToChat
+
 
 }
 
