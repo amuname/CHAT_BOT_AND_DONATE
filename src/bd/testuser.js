@@ -21,22 +21,22 @@ const user = 1079919770 //1079919770
 	// START of bdGetUser
 	// bdGetUser(user)
 
+	allInQueue()
+					// bdAddUser({
+					// 			user:{
+					// 				id:user,
+					// 				lang:'ru',
+					// 				chat_status:'bot',
+					// 				messages_sended: [
+					// 	            	{
+					// 	            		to:'bot',
+					// 	            		usr_msg:'/start',
+					// 	            		time:123,
+					// 	            	},
+					// 	            ]
 
-					bdAddUser({
-								user:{
-									id:user,
-									lang:'ru',
-									chat_status:'bot',
-									messages_sended: [
-						            	{
-						            		to:'bot',
-						            		usr_msg:'/start',
-						            		time:123,
-						            	},
-						            ]
-
-								}
-							})
+					// 			}
+					// 		})
 
 	async function bdGetUser(user_id){
 		
@@ -112,3 +112,32 @@ const user = 1079919770 //1079919770
 	// 	return 'registred'
 
 	// }
+
+	async function allInQueue(){
+		let response,error
+		await client.connect()
+		const db = client.db(dbName)
+		try{
+	        const collection = db.collection(collections.bot_users)
+	        const first_user_cursor = await collection.find({'user.chat_status':'in_queue'})
+	        const array_of_users_in_queue = await first_user_cursor.toArray()
+	        function randomUser(user_array){
+	        	const min = 0
+	        	const max = user_array.length-1
+	        	const index = Math.round(min + Math.random() * (max - min))
+	        	return user_array[index]
+	        }
+	        const first_user = randomUser(array_of_users_in_queue)
+	        console.log(first_user)
+	        response = 'OK'
+
+	    } catch (err) {
+
+	        error = err
+	    } finally {
+
+	        await client.close()
+
+	        return response
+	    }
+	}
