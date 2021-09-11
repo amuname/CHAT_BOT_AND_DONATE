@@ -18,4 +18,4 @@ Bot.on('callback_query',function(){
 
 Bot.launch()
 
-setInterval(botFuncs.intervalQuery.bind(Bot), 1000)
+setInterval(botFuncs.intervalQuery.bind(Bot), 2000)
