@@ -23,9 +23,73 @@ module.exports  = {
 			// }
 			// then get url like:
 			// https://api.telegram.org/file/bot<token>/<file_path>
+			// photo: [
+			// {
+			//     file_id: 'AgACAgIAAxkBAAIDI2E8UIGWbm5mHpp9bkttBrcVqHplAAK8tDEb_orRSbRJ346YcTECAQADAgADcwADIAQ',
+			//     file_unique_id: 'AQADvLQxG_6K0Ul4',
+			//     file_size: 1311,
+			//     width: 51,
+			//     height: 90
+			// },
+			// {
+			//     file_id: 'AgACAgIAAxkBAAIDI2E8UIGWbm5mHpp9bkttBrcVqHplAAK8tDEb_orRSbRJ346YcTECAQADAgADbQADIAQ',
+			//     file_unique_id: 'AQADvLQxG_6K0Uly',
+			//     file_size: 13887,
+			//     width: 180,
+			//     height: 320
+			// },
+			// {
+			//     file_id: 'AgACAgIAAxkBAAIDI2E8UIGWbm5mHpp9bkttBrcVqHplAAK8tDEb_orRSbRJ346YcTECAQADAgADeAADIAQ',
+			//     file_unique_id: 'AQADvLQxG_6K0Ul9',
+			//     file_size: 30783,
+			//     width: 339,
+			//     height: 604
+			// }
+			// ]
 			photo : telegram_response?.photo,
-			//
+			//video: {
+			//     duration: 1,
+			//     width: 720,
+			//     height: 1280,
+			//     mime_type: 'video/mp4',
+			//     thumb: {
+			//     	file_id: 'AAMCAgADGQEAAgMlYTxQ4FW00NIpOyhfyHlwpV2RTJ4AAqoSAAKZgeBJTEEUio7nUtkBAAdtAAMgBA',
+			//     	file_unique_id: 'AQADqhIAApmB4Ely',
+			//     	file_size: 3310,
+			//     	width: 180,
+			//     	height: 320
+			//     },
+			//     file_id: 'BAACAgIAAxkBAAIDJWE8UOBVtNDSKTsoX8h5cKVdkUyeAAKqEgACmYHgSUxBFIqO51LZIAQ',
+			//     file_unique_id: 'AgADqhIAApmB4Ek',
+			//     file_size: 224931
+			// }
 			video :[],
+			//voice: {
+			//   duration: 0,
+			//   mime_type: 'audio/ogg',
+			//   file_id: 'AwACAgIAAxkBAAIDIWE8T_5r3Dic9PkkFls5D-cQoQ0MAAKpEgACmYHgSStSMfVGx4mTIAQ',
+			//   file_unique_id: 'AgADqRIAApmB4Ek',
+			//   file_size: 4167
+			// }
+			voice:[],
+			// sticker: {
+			//     	width: 512,
+			// 		height: 512,
+			// 		emoji: '👌',
+			// 		set_name: 'Kabanch',
+			//    	is_animated: false,
+			// 		thumb: {
+			//    		file_id: 'AAMCAgADGQEAAgMnYTxUkq52pjqXhh9m29HFBDVIFw8AApYAA1dPFQjQS_JFizMDgAEAB20AAyAE',
+			//	 	    file_unique_id: 'AQADlgADV08VCHI',
+			// 		    file_size: 4000,
+			// 	    	width: 128,
+			// 	    	height: 128
+			//    	},
+			//    	file_id: 'CAACAgIAAxkBAAIDJ2E8VJKudqY6l4YfZtvRxQQ1SBcPAAKWAANXTxUI0EvyRYszA4AgBA',
+			//    	file_unique_id: 'AgADlgADV08VCA',
+			//    	file_size: 20814
+  			//}
+  			sticker:[]
 		}
 	},
 
@@ -115,10 +179,10 @@ module.exports  = {
 					await ctx.deleteMessage(msg_id)
 
 					const updadte_queue_status = await mLogic.bdOnlyUpdateMessage(sender_id,{
-				            		to:'',
+				            		to:'in_queue',
 				            		usr_msg:text,
 				            		time:date,
-				            	},'in_queue')
+				            	})
 
 					if (updadte_queue_status){
 						res(await ctx.reply('Looking for HOT MILFS',leave_butt))
@@ -131,11 +195,26 @@ module.exports  = {
 				case /Return to bot menu/.test(text) && user_status!=='bot' :
 					// только когда пользователь в чате или в поиске
 					// возварщает к меню бота
+					// console.log('Return to bot menu CONDITION')
+					if (/^\d+$/.test(user_status)) {
+						// console.log('Return to bot menu \r\nIF \r\nIF \r\nCONDITION')
+						await mLogic.bdOnlyUpdateMessage(parseInt(user_status),{
+				            		to:'bot',
+				            		usr_msg:'Opponent leave dialog',
+				            		time:date,
+				            	})
+
+						await bot.telegram.sendMessage(user_status,'Opponent leave dialog',)
+						await bot.telegram.sendMessage(user_status,'You`re in the bot menu now',start_keyboard)
+
+					}
+					// console.log('\r\nAFTER \r\nIF \r\nCONDITION')
+
 					await mLogic.bdOnlyUpdateMessage(sender_id,{
-				            		to:'',
+				            		to:'bot',
 				            		usr_msg:text,
 				            		time:date,
-				            	},'bot')
+				            	})
 
 					res(await bot.telegram.sendMessage(sender_id,'You`re in the bot menu now',start_keyboard))
 					break
@@ -151,17 +230,18 @@ module.exports  = {
 				            		to:user_status,
 				            		usr_msg:text,
 				            		time:date,
-				            	},user_status)
+				            	})
 					
 					res(await bot.telegram.sendMessage(user_status,text))
 
 					break
 				default :
 
-				console.log('\r\nUSER MSG\n',photo)
+				console.log('\r\nUSER MSG\n',message_object)
+				await bot.telegram.sendPhoto(sender_id,'https://docs.mongodb.com/images/mongodb-logo.png')
 
-				const m = await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard)
-				console.log('here!!!!!!!!!!!!!!!!!!!!!!!!\r\n',m)
+				/*const m =*/ await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard)
+				// console.log('here!!!!!!!!!!!!!!!!!!!!!!!!\r\n',m)
 				// m = {
 				//   message_id: 617,
 				//   from: {
@@ -178,7 +258,7 @@ module.exports  = {
 				//
 				//
 					res()
-					// console.log('this is default condition')
+					console.log('this is default condition')
 			}
 		})
 
@@ -235,7 +315,7 @@ module.exports  = {
 	},
 
 	async intervalQuery(){
-		const users_update = await twoUsersToChat()
+		const users_update = await mLogic.twoUsersToChat()
 		if (users_update instanceof Object) {
 			const {first_user,second_user} = users_update
 			const text = 'You`re in dialog now'
@@ -243,6 +323,11 @@ module.exports  = {
 			await this.telegram.sendMessage(second_user,text)
 		}
 		return
+		// в обработчике сообщений, если чел ливает, то
+		// надо написать метод, который будет
+		// удалять из диалога второго пользователя,
+		// а еще написать метод передачи сообщений между 
+		// 2мя пользователями УЖЕ ЕСТЬ АХАХАХАХАХА
 	},	
 
 
