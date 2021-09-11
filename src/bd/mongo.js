@@ -96,10 +96,10 @@ module.exports = {
 
 	// START of bdOnlyUpdateMessage
 
-	async bdOnlyUpdateMessage(user_id,message_to_add,new_status = ''){
+	async bdOnlyUpdateMessage(user_id,message_to_add){
 
 		const user_object = await this.bdGetUser(user_id)
-
+		// console.log(user_object)
 		const user_messages_with = user_object.user.chat_status
 		message_to_add.to = message_to_add.to !=='' ? message_to_add.to :  user_messages_with
 		// user_messages.push(message_to_add)
@@ -117,15 +117,17 @@ module.exports = {
 		        const collection = db.collection(collections.bot_users)
 		        const res = await collection.updateOne(
 		        	{'user.id':user_id},
-		        	{ $push: { 'user.messages_sended' : message_to_add} }
+		        	{ 
+		        		$push: { 'user.messages_sended' : message_to_add}, 
+		        		$set: { 'user.chat_status' : message_to_add.to}
+		        	}
 		        )
 
-		        if (new_status!=='') {
-			        await collection.updateOne(
-			        	{'user.id':user_id},
-			        	{ $set: { 'user.chat_status' : new_status} }
-			        )
-		        }
+			    // await collection.updateOne(
+			    //    	{'user.id':user_id},
+			    //    	{ $set: { 'user.chat_status' : message_to_add.to} }
+			    // )
+
 		        response = res ? 'OK' : false
 
 		    } catch (err) {
@@ -188,45 +190,32 @@ module.exports = {
 	        	return user_array[index].user.id
 	        }
 	        const first_user = randomUser(array_of_users_in_queue)
-	        console.log(first_user)
-	        let second_user = 0
+	        // console.log(first_user)
 	        //
 	        //
 	        // ВОТ ТУТ ПИЗДА
 	        //
 	        //
-	        if (array_of_users_in_queue.length !== 1 || array_of_users_in_queue.length !== 2){
-		        do {
-		        	second_user = randomUser(array_of_users_in_queue)
-
-		        } while(first_user === second_user && array_of_users_in_queue.length !== 1)
-	        } else {
-	        	if (array_of_users_in_queue.indexOf(first_user)!==0){
-	        		second_user = array_of_users_in_queue[0].user.id
-	        	} else {
-	        		if (array_of_users_in_queue.length == 1) {
-	        			await client.close()
-	        			return false
-	        		}
-	        		second_user = array_of_users_in_queue[1].user.id
-	        	}
-	        }
+	        const second_user_cursor = await collection.find({'user.id': {$not: {$eq: first_user} } ,'user.chat_status':'in_queue'})
+			const arr_of_filtred_users = await second_user_cursor.toArray()
+			const second_user = randomUser(arr_of_filtred_users)
+	        console.log(second_user)
 
 	        const res1 = await collection.updateOne(
 		        	{'user.id':first_user},
-		        	{ $set: { 'user.chat_status' : second_user} }
+		        	{ $set: { 'user.chat_status' : second_user.toString()} }
 		        )
 
 	        const res2 = await collection.updateOne(
 		        	{'user.id':second_user},
-		        	{ $set: { 'user.chat_status' : first_user} }
+		        	{ $set: { 'user.chat_status' : first_user.toString()} }
 		        )
 	        
 	        response = res1 && res2 ? {first_user,second_user} : false
 
 	    } catch (err) {
 
-	        error = err
+	        // console.log(err)
 	    } finally {
 
 	        await client.close()
