@@ -21,7 +21,9 @@ const user = 1079919770 //1079919770
 	// START of bdGetUser
 	// bdGetUser(user)
 
-	allInQueue()
+	// allInQueue()
+
+	notId(1079919770)
 					// bdAddUser({
 					// 			user:{
 					// 				id:user,
@@ -140,4 +142,16 @@ const user = 1079919770 //1079919770
 
 	        return response
 	    }
+	}
+
+
+
+	async function notId(id) {
+		await client.connect()
+		const db = client.db(dbName)
+		const collection = db.collection(collections.bot_users)
+		const first_user_cursor = await collection.find({'user.id': {$not: {$eq: id} } ,'user.chat_status':'in_queue'})
+		const arr = await first_user_cursor.toArray()
+		await client.close()
+		return console.log(arr)	
 	}
