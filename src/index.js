@@ -9,9 +9,15 @@ const Bot = new Telegraf(token)
 
 // BOT.getUpdates().then(e=>console.log(e))
 
-Bot.on('message',
-	(ctx)=>botFuncs.onMessage(ctx,Bot)
+Bot.on('text',
+	(ctx)=>botFuncs.onText(ctx,Bot)
 )
+Bot.on(['photo','sticker'],
+	(ctx)=>botFuncs.onPhoto(ctx,Bot)
+)
+// Bot.on('sticker',
+// 	(ctx)=>botFuncs.onSticker(ctx,Bot)
+// )
 Bot.on('callback_query',function(){
 	
 })
