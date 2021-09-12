@@ -153,11 +153,44 @@ module.exports = {
 
 	async userStatus(user_id){
 		let response,error
+
+		try{
+			await client.connect()
+			const db = client.db(dbName)
+			const collection = db.collection(collections.bot_users)
+	        const cursor = await collection.find({'user.id':user_id})
+	        const res = await cursor.toArray()
+
+	        // console.log(res.length)
+	        if (res.length==0) response = undefined
+	        else {
+	        	response = res[0].user.chat_status
+	        }
+
+	    } catch (err) {
+
+	        error = err
+	        console.log(err)
+	    } finally {
+
+	        await client.close()
+
+	        return response
+	    }
+	},
+
+	// END of userStatus
+
+
+	// START of userPhoto
+
+	async userPhoto(user_id){
+		let response,error
 		const user_object = await this.bdGetUser(user_id)
 
 		try{
 
-	        response = user_object.user.chat_status
+	        response = user_object.user.vip
 
 	    } catch (err) {
 
@@ -170,7 +203,7 @@ module.exports = {
 	    }
 	},
 
-	// END of userStatus
+	// END of userPhoto
 
 
 	// START of twoUsersToChat
