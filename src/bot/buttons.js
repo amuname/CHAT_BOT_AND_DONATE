@@ -23,6 +23,17 @@ const buttonBuilder = {
 			
 			res({
 			'reply_markup': {
+			    'inline_keyboard': array_of_keyboard_buttons 
+			    }
+			})
+
+		})	
+	},
+	buttonsKeyBoard(array_of_keyboard_buttons){
+		if (!Array.isArray(array_of_keyboard_buttons)) throw new TypeError('keyboard is not array')
+		return new Promise((res,rej)=>{
+			res({
+			'reply_markup': {
 			    'keyboard': array_of_keyboard_buttons 
 			    }
 			})
@@ -50,6 +61,12 @@ const buttonBuilder = {
 	leave_buttons: [
 					    [{  // if url_or_callback == true
 					        text: 'Return to bot menu',
+					        // callback_data: 'test'
+					    }],
+					],
+	donate_buttons: [
+					    [{  // if url_or_callback == true
+					        text: 'donate for VIP status',
 					        // callback_data: 'test'
 					    }],
 					],
