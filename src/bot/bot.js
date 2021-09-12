@@ -1,7 +1,10 @@
 'use strict'
 // const onMessagePromiseOptions = require('./onMessageOptions.js')
-const serverUrl = require('./serverUrl.js')
-const {inlineButtonsKeyBoard,start_buttons,leave_buttons} = require('./buttons.js')
+// const serverUrl = require('./serverUrl.js')
+const fs = require('fs')
+const imGt = require('../server/imageGet.js')
+const dateToAdd = require('./date.js') // argument in (days) return value 'mounth/days/years'
+const {inlineButtonsKeyBoard,buttonsKeyBoard,start_buttons,leave_buttons,donate_buttons} = require('./buttons.js')
 const mLogic = require('./../bd/mongo.js') // '..' - backward directory
 
 // console.log(Telegraf)
@@ -46,7 +49,7 @@ module.exports  = {
 			//     height: 604
 			// }
 			// ]
-			photo : telegram_response?.photo,
+			photo : telegram_response.photo || null,
 			//video: {
 			//     duration: 1,
 			//     width: 720,
@@ -63,7 +66,7 @@ module.exports  = {
 			//     file_unique_id: 'AgADqhIAApmB4Ek',
 			//     file_size: 224931
 			// }
-			video :[],
+			video : telegram_response.video || null,
 			//voice: {
 			//   duration: 0,
 			//   mime_type: 'audio/ogg',
@@ -71,7 +74,7 @@ module.exports  = {
 			//   file_unique_id: 'AgADqRIAApmB4Ek',
 			//   file_size: 4167
 			// }
-			voice:[],
+			voice: telegram_response.voice || null,
 			// sticker: {
 			//     	width: 512,
 			// 		height: 512,
@@ -89,7 +92,7 @@ module.exports  = {
 			//    	file_unique_id: 'AgADlgADV08VCA',
 			//    	file_size: 20814
   			//}
-  			sticker:[]
+  			sticker: telegram_response.sticker || null,
 		}
 	},
 
@@ -110,7 +113,7 @@ module.exports  = {
 
 	// callback methods
 
-	onMessage(ctx,bot){
+	onText(ctx,bot){
 		const message_object = ctx.update.message
 		
 		//!!!!!!!!!!!!!!!!
@@ -120,27 +123,27 @@ module.exports  = {
 		//!!!!!!!!!!!!!!!!
 
 		const {msg_id,sender_id,is_bot,f_name,chat_id,
-			chat_f_name,chat_type,date,text,lang_code,photo} = this.responseToReadableMessage(message_object)
+			chat_f_name,chat_type,date,text,lang_code} = this.responseToReadableMessage(message_object)
 
 		// this method send message and can be usefull in server callbacks
 		// 
 		// console.log('\r\nOnmessage',text)
 		return new Promise(async (res,rej)=> {
-			const start_keyboard = await inlineButtonsKeyBoard(start_buttons)
-			const leave_butt = await inlineButtonsKeyBoard(leave_buttons)
+			const start_keyboard = await buttonsKeyBoard(start_buttons)
+			const leave_butt = await buttonsKeyBoard(leave_buttons)
 			const start_regexp = /\/start .\d+/,
 			start = /\/start/
 
 			const user_status = await mLogic.userStatus(sender_id)
-			// if (user_status) {}
+			// console.log(user_status)
 
 			switch (true){
 				case start.test(text) : 
 
-					if(user_status!==undefined || user_status!=='bot'){
+					if(user_status =='in_queue'){
 						return res(await bot.telegram.sendMessage(sender_id,'use buttons to leave queue or chat',leave_butt))
 					}
-					if(user_status===undefined ){
+					if(!user_status){
 						const dbStartResponse =await mLogic.bdAddUser({
 							user:{
 								id:sender_id,
@@ -152,7 +155,9 @@ module.exports  = {
 					            		usr_msg:text,
 					            		time:date,
 					            	},
-					            ]
+					            ],
+					            vip: dateToAdd(-1),
+					            lang:''
 							}
 						})	
 
@@ -163,11 +168,11 @@ module.exports  = {
 							res(await bot.telegram.sendMessage(sender_id,'hello there',start_keyboard))
 
 						}
+						if(dbStartResponse=='registred'){
+							res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard))
+						}
 					}
 					 
-					if(dbStartResponse=='registred'){
-						res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard))
-					}
 							
 					break
 				case start_regexp.test(text) && user_status =='bot' : 
@@ -231,14 +236,16 @@ module.exports  = {
 				            		usr_msg:text,
 				            		time:date,
 				            	})
-					
-					res(await bot.telegram.sendMessage(user_status,text))
+					const msg_to_delete = await ctx.reply('sending...')
+					await bot.telegram.sendMessage(user_status,text)
+					await ctx.deleteMessage(msg_to_delete.message_id)
+					res()
 
 					break
 				default :
 
 				console.log('\r\nUSER MSG\n',message_object)
-				await bot.telegram.sendPhoto(sender_id,'https://docs.mongodb.com/images/mongodb-logo.png')
+				// await bot.telegram.sendPhoto(sender_id,'https://docs.mongodb.com/images/mongodb-logo.png')
 
 				/*const m =*/ await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard)
 				// console.log('here!!!!!!!!!!!!!!!!!!!!!!!!\r\n',m)
@@ -262,6 +269,79 @@ module.exports  = {
 			}
 		})
 
+	},
+
+
+	onPhoto(ctx,bot){
+		const message_object = ctx.update.message
+		
+		//!!!!!!!!!!!!!!!!
+		//
+		//here bot buttons AYAYAYAYA!! check SWITCH 
+		//
+		//!!!!!!!!!!!!!!!!
+		const {msg_id,sender_id,is_bot,f_name,chat_id,
+			chat_f_name,chat_type,date,text,lang_code,photo} = this.responseToReadableMessage(message_object)
+		
+
+		return new Promise(async (res,rej)=> {
+			const d_buttons = await buttonsKeyBoard(donate_buttons)
+			const user_object = await mLogic.bdGetUser(sender_id)
+			const vip_status = user_object.user.vip
+			const user_status = user_object.user.chat_status
+			// console.log('vip_status => %s\r\nuser_status => %s\r\nuser %s',vip_status,user_status,user)
+			switch (true){
+				case new Date(vip_status) <= new Date() && /^\d+$/.test(user_status) : 	//gona be >= not <=
+					console.log('VIP STATUS')
+					const hi_res_photo = photo[photo.length-1].file_id
+					const photo_system_addres = await imGt(hi_res_photo)
+					const msg_to_delete = await ctx.reply('sending...')
+					await mLogic.bdOnlyUpdateMessage(sender_id,{
+				            		to:user_status,
+				            		usr_msg:photo_system_addres,
+				            		time:date,
+				            	})
+					await bot.telegram.sendPhoto(user_status,{ source: './img/'+photo_system_addres} )
+					await ctx.deleteMessage(msg_to_delete.message_id)
+					res()
+					break
+				default :
+				await bot.telegram.sendMessage(sender_id,'You can`t send photo\n to another user or bot,\
+				\nuse /help command to understand\
+				\nuse /vip to donate ',inlineButtonsKeyBoard)
+				res()
+			}
+		})
+
+	},
+
+
+	onSticker(ctx,bot){
+		const message_object = ctx.update.message
+		
+		//!!!!!!!!!!!!!!!!
+		//
+		//here bot buttons AYAYAYAYA!! check SWITCH 
+		//
+		//!!!!!!!!!!!!!!!!
+
+		const {msg_id,sender_id,is_bot,f_name,chat_id,
+			chat_f_name,chat_type,date,text,lang_code,sticker} = this.responseToReadableMessage(message_object)
+	
+		return new Promise(async (res,rej)=> {
+			switch (true){
+				case start.test(text) : 
+
+					break
+				
+				case start.test(text) : 
+
+					break
+
+				default :
+
+			}
+		})
 	},
 
 
@@ -315,6 +395,7 @@ module.exports  = {
 	},
 
 	async intervalQuery(){
+		// женит двух пользователей 
 		const users_update = await mLogic.twoUsersToChat()
 		if (users_update instanceof Object) {
 			const {first_user,second_user} = users_update
@@ -323,11 +404,6 @@ module.exports  = {
 			await this.telegram.sendMessage(second_user,text)
 		}
 		return
-		// в обработчике сообщений, если чел ливает, то
-		// надо написать метод, который будет
-		// удалять из диалога второго пользователя,
-		// а еще написать метод передачи сообщений между 
-		// 2мя пользователями УЖЕ ЕСТЬ АХАХАХАХАХА
 	},	
 
 
