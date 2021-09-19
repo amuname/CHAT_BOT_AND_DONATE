@@ -13,7 +13,7 @@ Bot.on('text',
 	(ctx)=>botFuncs.onText(ctx,Bot)
 )
 Bot.on(['photo','sticker'],
-	(ctx)=>botFuncs.onPhoto(ctx,Bot)
+	(ctx)=>setTimeout(botFuncs.onPhoto.bind(botFuncs,ctx,Bot),3000)
 )
 // Bot.on('sticker',
 // 	(ctx)=>botFuncs.onSticker(ctx,Bot)
