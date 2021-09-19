@@ -23,7 +23,7 @@ const user = 1079919770 //1079919770
 
 	// allInQueue()
 
-	notId(1079919770)
+	// notId(1079919770)
 					// bdAddUser({
 					// 			user:{
 					// 				id:user,
