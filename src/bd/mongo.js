@@ -23,30 +23,18 @@ module.exports = {
 	// START of bdGetUser
 
 	async bdGetUser(user_id){
-		
 		let response,error
-
 		await client.connect()
-		
 		const db = client.db(dbName)
-
 		try{
-
 	        const collection = db.collection(collections.bot_users)
-
 	        const res = await collection.findOne({'user.id':user_id})
-
 	        // console.log(res.user.conversations_with.bot)
-
 	        response = res
-
 	    } catch (err) {
-
 	        error = err
 	    } finally {
-
 	        await client.close()
-
 	        return response
 	    }
 	},
@@ -57,38 +45,23 @@ module.exports = {
 	// START of bdAddUser
 
 	async bdAddUser(user_object){
-
-
 		const user = await this.bdGetUser(user_object.user.id)
 		if (!user) {
-
 			let response,error
-
 			await client.connect()
-		
 			const db = client.db(dbName)
-
 			try{
-
 		        const collection = db.collection(collections.bot_users)
-
 		        const res = await collection.insertOne(user_object)
-
 		        response = res ? 'OK' : false
-
 		    } catch (err) {
-
 		        error = err
 		    } finally {
-
 		        await client.close()
-
 		        return response
 		    }
-
 		}
 		return 'registred'
-
 	},
 
 	// END of bdAddUser
@@ -97,53 +70,37 @@ module.exports = {
 	// START of bdOnlyUpdateMessage
 
 	async bdOnlyUpdateMessage(user_id,message_to_add){
+		let response,error
+		await client.connect()
+		const db = client.db(dbName)
+		try{
+	        const collection = db.collection(collections.bot_users)
 
-		const user_object = await this.bdGetUser(user_id)
-		// console.log(user_object)
-		const user_messages_with = user_object.user.chat_status
-		message_to_add.to = message_to_add.to !=='' ? message_to_add.to :  user_messages_with
-		// user_messages.push(message_to_add)
-		console.log('AFTER PUSH()! below =>\r\n',user_messages_with)
+			const user_object = await collection.findOne({'user.id':user_id})
+			const user_messages_with = user_object.user.chat_status
+			message_to_add.to = message_to_add.to !=='' ? message_to_add.to :  user_messages_with
+			// user_messages.push(message_to_add)
+			console.log('AFTER PUSH()! below =>\r\n',user_messages_with)
 
-		// if (!user_object) {
-
-			let response,error
-
-			await client.connect()
-		
-			const db = client.db(dbName)
-
-			try{
-		        const collection = db.collection(collections.bot_users)
-		        const res = await collection.updateOne(
-		        	{'user.id':user_id},
-		        	{ 
-		        		$push: { 'user.messages_sended' : message_to_add}, 
-		        		$set: { 'user.chat_status' : message_to_add.to}
-		        	}
-		        )
-
-			    // await collection.updateOne(
-			    //    	{'user.id':user_id},
-			    //    	{ $set: { 'user.chat_status' : message_to_add.to} }
-			    // )
-
-		        response = res ? 'OK' : false
-
-		    } catch (err) {
-		        console.log(err)
-
-		        error = err
-		    } finally {
-
-		        await client.close()
-
-		        return response
-		    }
-
-		// }
-		// return 'bad'
-
+	        const res = await collection.updateOne(
+	        	{'user.id':user_id},
+	        	{ 
+	        		$push: { 'user.messages_sended' : message_to_add}, 
+	        		$set: { 'user.chat_status' : message_to_add.to}
+	        	}
+	        )
+		    // await collection.updateOne(
+		    //    	{'user.id':user_id},
+		    //    	{ $set: { 'user.chat_status' : message_to_add.to} }
+		    // )
+	        response = res ? 'OK' : false
+	    } catch (err) {
+	        console.log(err)
+	        error = err
+	    } finally {
+	        await client.close()
+	        return response
+	    }
 	},
 
 	// END of bdOnlyUpdateMessage
