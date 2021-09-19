@@ -20,7 +20,8 @@ module.exports  = {
 			is_bot : telegram_response.from.is_bot,		f_name : telegram_response.from.first_name,
 			chat_id : telegram_response.chat.id,		chat_f_name : telegram_response.chat.first_name,
 			chat_type : telegram_response.chat.type,	date : telegram_response.date,
-			text : telegram_response.text, 				lang_code : telegram_response.from.language_code,
+			text : telegram_response.text||telegram_response.caption||null,
+			lang_code : telegram_response.from.language_code,
 			// u need  {
   			//	 file_id: 'AgACAgIAAxkBAAICfmE4_IaoMFLiQBb5FgTepvbdhYAcAAIetDEbvxzIST3toFg0cb4rAQADAgADeQADIAQ',
 			// }
@@ -154,6 +155,7 @@ module.exports  = {
 					            		to:'bot',
 					            		usr_msg:text,
 					            		time:date,
+					            		photo:null
 					            	},
 					            ],
 					            vip: dateToAdd(-1),
@@ -273,6 +275,7 @@ module.exports  = {
 
 
 	onPhoto(ctx,bot){
+		return new Promise(async (res,rej)=> {
 		const message_object = ctx.update.message
 		
 		//!!!!!!!!!!!!!!!!
@@ -284,32 +287,42 @@ module.exports  = {
 			chat_f_name,chat_type,date,text,lang_code,photo} = this.responseToReadableMessage(message_object)
 		
 
-		return new Promise(async (res,rej)=> {
 			const d_buttons = await buttonsKeyBoard(donate_buttons)
+			console.log('for photos AYAYAYA',sender_id)
 			const user_object = await mLogic.bdGetUser(sender_id)
+			if(!user_object){
+				setTimeout(this.onPhoto.bind(this,ctx,bot), 3000)
+				return
+			}
+			console.log('user photo sender object',user_object)
 			const vip_status = user_object.user.vip
 			const user_status = user_object.user.chat_status
 			// console.log('vip_status => %s\r\nuser_status => %s\r\nuser %s',vip_status,user_status,user)
 			switch (true){
 				case new Date(vip_status) <= new Date() && /^\d+$/.test(user_status) : 	//gona be >= not <=
 					console.log('VIP STATUS')
+					// photo with caption/text need to send text to another user
+					// like message or msg with photo
 					const hi_res_photo = photo[photo.length-1].file_id
 					const photo_system_addres = await imGt(hi_res_photo)
 					const msg_to_delete = await ctx.reply('sending...')
 					await mLogic.bdOnlyUpdateMessage(sender_id,{
 				            		to:user_status,
-				            		usr_msg:photo_system_addres,
+				            		usr_msg:text,
+				            		photo:photo_system_addres,
 				            		time:date,
 				            	})
 					await bot.telegram.sendPhoto(user_status,{ source: './img/'+photo_system_addres} )
 					await ctx.deleteMessage(msg_to_delete.message_id)
 					res()
+					return
 					break
 				default :
 				await bot.telegram.sendMessage(sender_id,'You can`t send photo\n to another user or bot,\
 				\nuse /help command to understand\
 				\nuse /vip to donate ',inlineButtonsKeyBoard)
-				res()
+				res()  
+				// return
 			}
 		})
 
