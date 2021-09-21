@@ -3,7 +3,7 @@
 // const serverUrl = require('./serverUrl.js')
 const fs = require('fs')
 const imGt = require('../server/imageGet.js')
-const dateToAdd = require('./date.js') // argument in (days) return value 'mounth/days/years'
+const dateToAdd = require('./date.js') // argument in (days) return value '321321321321321'
 const {inlineButtonsKeyBoard,buttonsKeyBoard,start_buttons,leave_buttons,donate_buttons} = require('./buttons.js')
 const mLogic = require('./../bd/mongo.js') // '..' - backward directory
 
@@ -418,6 +418,13 @@ module.exports  = {
 		}
 		return
 	},	
+
+	denyMsg(ctx,bot){
+		return new Promise( async (res,rej)=>{
+			const start_keyboard = await buttonsKeyBoard(start_buttons)
+			res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard))
+		})
+	},
 
 
 }
