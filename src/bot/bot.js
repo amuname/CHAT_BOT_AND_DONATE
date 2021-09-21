@@ -374,38 +374,38 @@ module.exports  = {
 
 	// SEND message methods
 
-	deleteMsg(chat_id,msg_id){
-		if(typeof chat_id !== 'string' && typeof msg_id !== 'string') throw new TypeError('all must be strings')
-		this.bot.deleteMessage(chat_id,msg_id)
-	},
+	// deleteMsg(chat_id,msg_id){
+	// 	if(typeof chat_id !== 'string' && typeof msg_id !== 'string') throw new TypeError('all must be strings')
+	// 	this.bot.deleteMessage(chat_id,msg_id)
+	// },
 
-	editTextMessage(new_text,chat_id,msg_id,inline_obj = {}){
-		inline_obj = inline_obj.reply_markup ? inline_obj : {}
+	// editTextMessage(new_text,chat_id,msg_id,inline_obj = {}){
+	// 	inline_obj = inline_obj.reply_markup ? inline_obj : {}
 
-		if(typeof new_text !== 'string' && typeof chat_id !== 'string' && typeof msg_id !== 'string' && typeof inline_obj !== 'object') throw new TypeError('one argument or more incorrect')
+	// 	if(typeof new_text !== 'string' && typeof chat_id !== 'string' && typeof msg_id !== 'string' && typeof inline_obj !== 'object') throw new TypeError('one argument or more incorrect')
 		
-		this.bot.editMessageText(new_text,{chat_id,msg_id,inline_obj})
-	},
+	// 	this.bot.editMessageText(new_text,{chat_id,msg_id,inline_obj})
+	// },
 
-	sendMsg(chat_id,msg_or_sticker_url,inline_obj = {}){
-		inline_obj = inline_obj.reply_markup ? inline_obj : {}
-		// console.log('what')
-		return new Promise(async (res,rej)=>{
-			try{
-				new URL(msg_or_sticker_url)
-				const message = await this.sendSticker(chat_id,msg_or_sticker_url,inline_obj)
-				res(message)
-			}
+	// sendMsg(chat_id,msg_or_sticker_url,inline_obj = {}){
+	// 	inline_obj = inline_obj.reply_markup ? inline_obj : {}
+	// 	// console.log('what')
+	// 	return new Promise(async (res,rej)=>{
+	// 		try{
+	// 			new URL(msg_or_sticker_url)
+	// 			const message = await this.sendSticker(chat_id,msg_or_sticker_url,inline_obj)
+	// 			res(message)
+	// 		}
 
-			catch(err){
-				if (err instanceof TypeError) {
-					const message = await this.sendMessage(chat_id,msg_or_sticker_url,inline_obj)
-					res(message)
-				}
-				else throw new Error('wrong msg type')
-			}
-		})
-	},
+	// 		catch(err){
+	// 			if (err instanceof TypeError) {
+	// 				const message = await this.sendMessage(chat_id,msg_or_sticker_url,inline_obj)
+	// 				res(message)
+	// 			}
+	// 			else throw new Error('wrong msg type')
+	// 		}
+	// 	})
+	// },
 
 	async intervalQuery(){
 		// женит двух пользователей 
