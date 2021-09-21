@@ -22,6 +22,10 @@ Bot.on('callback_query',function(){
 	
 })
 
+Bot.on('message',
+	(ctx)=>botFuncs.denyMsg(ctx,Bot)
+)
+
 Bot.launch()
 
 setInterval(botFuncs.intervalQuery.bind(Bot), 2000)
