@@ -12,7 +12,7 @@ const Bot = new Telegraf(token)
 Bot.on('text',
 	(ctx)=>botFuncs.onText(ctx,Bot)
 )
-Bot.on(['photo','sticker'],
+Bot.on(['photo'],
 	(ctx)=>setTimeout(botFuncs.onPhoto.bind(botFuncs,ctx,Bot),3000)
 )
 // Bot.on('sticker',
