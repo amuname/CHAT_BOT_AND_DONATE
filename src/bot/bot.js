@@ -1,6 +1,6 @@
 'use strict'
 // const onMessagePromiseOptions = require('./onMessageOptions.js')
-// const serverUrl = require('./serverUrl.js')
+const serverUrl = require('./serverUrl.js')
 const fs = require('fs')
 const imGt = require('../server/imageGet.js')
 const dateToAdd = require('./date.js') // argument in (days) return value '321321321321321'
