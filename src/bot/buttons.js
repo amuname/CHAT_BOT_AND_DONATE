@@ -67,7 +67,7 @@ const buttonBuilder = {
 	donate_buttons: [
 					    [{  // if url_or_callback == true
 					        text: 'donate for VIP status',
-					        // callback_data: 'test'
+					        // callback_data: 'test',
 					    }],
 					],
 
