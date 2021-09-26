@@ -15,6 +15,7 @@ const collections = {
 	bot_curiers : 'bot_curiers',
 	bot_admins : 'bot_admins', //??? optional
 	bot_users : 'bot_users',
+	bot_config : 'bot_config',
 }
 
 const user = 1079919770 //1079919770
@@ -155,3 +156,55 @@ const user = 1079919770 //1079919770
 		await client.close()
 		return console.log(arr)	
 	}
+
+
+
+	async function configCheck(){
+		
+		const donator_config = {
+			config:{
+				rub: {
+					one_day : 59,
+					five_days : 199,
+					two_weeks : 499,
+					mounth : 899,
+					always : 3999,
+				},
+				bucks: {
+					one_day : 2,
+					five_days : 6,
+					two_weeks : 8,
+					mounth : 14,
+					always : 59,
+				}	
+			}
+			
+		}
+
+		await client.connect()
+		const db = client.db(dbName)
+		let r
+		try{
+			const collection = db.collection(collections.bot_config)
+			const query = 'config'+'.$'+'rub'
+		    const res = await collection.findOne({'config':Object})
+		    // const res = await cursor.toArray()
+		    r= res
+		    // if (res.length==0){
+		    // 	await collection.insertOne(donator_config)
+		    // }
+		    console.log(res.config['rub'])
+	    } catch (err) {
+		    console.log(err,"HANDLED ERROORR")
+
+	    } finally {
+
+	        await client.close()
+
+	        return r['rub']
+	    }
+	}
+
+
+	// configCheck()
+	bdGetUser(user)
