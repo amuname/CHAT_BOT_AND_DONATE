@@ -4,7 +4,7 @@ const serverUrl = require('./serverUrl.js')
 const fs = require('fs')
 const imGt = require('../server/imageGet.js')
 const dateToAdd = require('./date.js') // argument in (days) return value '321321321321321'
-const {inlineButtonsKeyBoard,buttonsKeyBoard,start_buttons,leave_buttons,donate_buttons} = require('./buttons.js')
+const {inlineButtonsKeyBoard,buttonsKeyBoard,start_buttons,leave_buttons,donateButtons,lang_buttons} = require('./buttons.js')
 const mLogic = require('./../bd/mongo.js') // '..' - backward directory
 
 // console.log(Telegraf)
@@ -101,9 +101,9 @@ module.exports  = {
 
 	async createDonationUrl(msg_info){
 		// use inline buttons
-		const base64_url = Buffer.from(new String(msg_info.sender_id+msg_info.amount)).toString('base64') 
+		const base64_url = Buffer.from(new String(msg_info.sender_id+new Date().valueOf())).toString('base64') 
 
-		const bd_url = serverUrl + '?donation_id=' + base64_url
+		const bd_url = serverUrl + '/d/?donation_id=' + base64_url
 		return bd_url
 	},
 
@@ -131,20 +131,31 @@ module.exports  = {
 			const start_regexp = /\/start .\d+/,
 			start = /\/start/
 
-			const user_status = await mLogic.userStatus(sender_id)
+			const user_object = await mLogic.bdGetUser(sender_id)
+			const user_status = user_object?.user?.chat_status
+			const user_lang = user_object?.user?.lang
 			// console.log(user_status)
 
 			switch (true){
-				case start.test(text) : 
+				case /*start.test(text)*/ !user_object : 
 
-					if(user_status =='in_queue'){
-						return res(await bot.telegram.sendMessage(sender_id,'use buttons to leave queue or chat',leave_butt))
-					}
-					if(!user_status){
-						const dbStartResponse =await mLogic.bdAddUser({
+					// if(user_status =='in_queue'){
+					// 	return res(await bot.telegram.sendMessage(sender_id,'use buttons to leave queue or chat',leave_butt))
+					// }
+					// if(!user_status){
+					return res(await bot.telegram.sendMessage(sender_id,'Choose bot language', await buttonsKeyBoard(lang_buttons)))
+					// }
+					 
+							
+					break
+				case start_regexp.test(text) && user_status =='bot' : 
+							//
+							//
+					break
+				case /ru/.test(text) && !user_object || /en/.test(text) && !user_object : 
+							const dbStartResponse =await mLogic.bdAddUser({
 							user:{
 								id:sender_id,
-								lang:lang_code,
 								chat_status:'bot',
 					            messages_sended: [
 					            	{
@@ -155,7 +166,7 @@ module.exports  = {
 					            	},
 					            ],
 					            vip: dateToAdd(-1),
-					            lang:''
+					            lang:text,
 							}
 						})	
 
@@ -168,15 +179,7 @@ module.exports  = {
 						}
 						if(dbStartResponse=='registred'){
 							res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard))
-						}
-					}
-					 
-							
-					break
-				case start_regexp.test(text) && user_status =='bot' : 
-							//
-							//
-					break
+						}					break
 				case /find member to chat/.test(text) && user_status =='bot' : 
 
 					await ctx.deleteMessage(msg_id)
@@ -238,6 +241,16 @@ module.exports  = {
 					await bot.telegram.sendMessage(user_status,text)
 					await ctx.deleteMessage(msg_to_delete.message_id)
 					res()
+
+					break
+				//
+				// DONATION
+				//
+				case /donate for VIP status/.test(text) && /bot/.test(user_status) :
+					const oobject_values = await configFind(user_lang)
+					const leave_butt = await inlineButtonsKeyBoard(donateButtons(user_lang,))
+
+					res(await bot.telegram.sendMessage(sender_id,``,leave_butt))
 
 					break
 				default :
@@ -363,7 +376,7 @@ module.exports  = {
 		const message_object = ctx.update.callback_query
 		const query_data = message_object.data
 		const sender_id = message_object.from.id
-		if(true){ // check if it amount callback query
+		if(/donation_.*/.test(query_data)){ // check if it amount callback query
 
 			const currency = query_data.replace(/\D+/gm,'')
 			const amount = query_data.replace(/\d+/gm,'')
@@ -381,7 +394,6 @@ module.exports  = {
 			ctx.reply('donate here pls <3',donate_board)
 		}
 
-		return
 	}
 
 
