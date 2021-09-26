@@ -1,4 +1,4 @@
-
+'use strict'
 module.exports = function(price,user,time){
 	const domain = ''
 	const url = 'http'+'s'+'://'+domain+'/'
