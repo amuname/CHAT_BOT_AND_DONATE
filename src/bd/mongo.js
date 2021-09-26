@@ -15,6 +15,7 @@ const collections = {
 	bot_curiers : 'bot_curiers',
 	bot_admins : 'bot_admins', //??? optional
 	bot_users : 'bot_users',
+	bot_donation : 'bot_donation',
 }
 
 module.exports = {
@@ -215,6 +216,39 @@ module.exports = {
 	},
 
 	// END of twoUsersToChat
+
+
+	// START of writeDonationUrl
+
+	async writeDonationUrl(user_id,url,donation_status,amount,currency){
+		let response,error
+		const user_object = {
+			'user_id' : user_id,
+			'url' : url,
+			'donation_status' : donation_status,
+			'amount' : amount,
+			'currency' : currency,
+		}
+		await client.connect()
+		const db = client.db(dbName)
+
+		try{
+			const collection = db.collection(collections.bot_donation)
+		    const res = await collection.insertOne(user_object)
+
+	    } catch (err) {
+
+	        error = err
+	    } finally {
+
+	        await client.close()
+
+	        return response
+	    }
+	},
+
+	// END of writeDonationUrl
+
 
 
 }
