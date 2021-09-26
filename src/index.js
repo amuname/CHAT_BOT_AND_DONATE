@@ -4,6 +4,7 @@ const {Telegraf} = require('telegraf')
 const token = require('./bot/token.js')
 const bd = require('./bd/mongo.js')
 
+bd.configCheck()
 
 const Bot = new Telegraf(token)
 
@@ -18,9 +19,9 @@ Bot.on(['photo'],
 // Bot.on('sticker',
 // 	(ctx)=>botFuncs.onSticker(ctx,Bot)
 // )
-Bot.on('callback_query',function(){
-	
-})
+Bot.on('callback_query',
+	(ctx)=>botFuncs.onQuery(ctx,Bot)
+)
 
 Bot.on('message',
 	(ctx)=>botFuncs.denyMsg(ctx,Bot)
