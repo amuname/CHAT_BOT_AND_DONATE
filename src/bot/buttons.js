@@ -64,15 +64,38 @@ const buttonBuilder = {
 					        // callback_data: 'test'
 					    }],
 					],
-	donate_buttons: [
+	lang_buttons: [
 					    [{  // if url_or_callback == true
-					        text: 'donate for VIP status',
-					        // callback_data: 'test',
+					        text: 'ru',
+					        // callback_data: 'test'
+					    }],
+					    [{  // if url_or_callback == true
+					        text: 'en',
+					        // callback_data: 'test'
 					    }],
 					],
+	donateButtons(currency,object_values){
+		let length = Object.entries(object_values).length
+		let array_of_buttons = new Array(length)
+		for (let i = 0; i < length; i++ ){ //Object.values(obj)[1]
+			const phrase = Object.keys(object_values)[i].replace(/_/,' ') 
+			array_of_buttons[i] = {
+				text : phrase,
+				callback_data :`${Object.values(object_values)[i]}  ${currency}`,
+			}
+		}
+		return [array_of_buttons]
+	},
 
 
 
 }
 
 module.exports = buttonBuilder
+
+// buttonBuilder.donate_buttons('rub',{one_day:59,
+// five_days:199,
+// two_weeks:499,
+// mounth:899,
+// always:3999,})
+
