@@ -16,6 +16,7 @@ const collections = {
 	bot_admins : 'bot_admins', //??? optional
 	bot_users : 'bot_users',
 	bot_donation : 'bot_donation',
+	bot_config : 'bot_config',
 }
 
 module.exports = {
@@ -155,7 +156,7 @@ module.exports = {
 	        error = err
 	    } finally {
 
-	        await client.close()
+	        // await client.close()
 
 	        return response
 	    }
@@ -249,6 +250,81 @@ module.exports = {
 
 	// END of writeDonationUrl
 
+	
+	// START of configCheck
+
+	async configCheck(){
+			
+		const donator_config = {
+			config:{
+				rub: {
+					one_day : 59,
+					five_days : 199,
+					two_weeks : 499,
+					mounth : 899,
+					always : 3999,
+				},
+				bucks: {
+					one_day : 2,
+					five_days : 6,
+					two_weeks : 8,
+					mounth : 14,
+					always : 59,
+				}	
+			}
+			
+		}
+
+		await client.connect()
+		const db = client.db(dbName)
+
+		try{
+			const collection = db.collection(collections.bot_config)
+
+		    const cursor = await collection.find({'config':Object})
+		    const res = await cursor.toArray()
+
+		    if (res.length==0){
+		    	await collection.insertOne(donator_config)
+		    }
+		    console.log(res)
+	    } catch (err) {
+		    console.log(err,"HANDLED ERROORR")
+
+	    } finally {
+
+	        await client.close()
+
+	        return 
+	    }
+	},
+
+	// END of configCheck
+
+
+	// START of configFind
+
+	async configFind(currency){
+		let query 
+		await client.connect()
+		const db = client.db(dbName)
+
+		try{
+			const collection = db.collection(collections.bot_config)
+		    const res = await collection.findOne({'config':Object})
+		    query = res.config[currency]
+	    } catch (err) {
+		    console.log(err,"HANDLED ERROORR")
+
+	    } finally {
+
+	        await client.close()
+
+	        return query 
+	    }
+	},
+
+	// END of configFind
 
 
 }
