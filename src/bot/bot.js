@@ -94,21 +94,17 @@ module.exports  = {
 			//    	file_size: 20814
   			//}
   			sticker: telegram_response.sticker || null,
+  			// only if photo has caption
+  			caption:telegram_response.caption || null
 		}
 	},
 
-	createDonationUrl(msg_info){
-		// using normal buttons, like text, not inline
-		const {msg_id,sender_id,is_bot,f_name,chat_id,
-			chat_f_name,chat_type,date,text,lang_code,photo} = this.responseToReadableMessage(msg_info)
+	async createDonationUrl(msg_info){
+		// use inline buttons
+		const base64_url = Buffer.from(new String(msg_info.sender_id+msg_info.amount)).toString('base64') 
 
-		const sID = serverUrl + '/donation?' + 'sender_id=' + sender_id,
-		lCode = sID + '&' + 'lang_code=' + lang_code,
-		amount = lCode + '&' + 'amount=' + text,
-		ch_id = amount + '&' + 'chat_id=' + chat_id,
-		url = /*new URL(*/ch_id/*)*/	
-
-		return url
+		const bd_url = serverUrl + '?donation_id=' + base64_url
+		return bd_url
 	},
 
 
@@ -284,7 +280,7 @@ module.exports  = {
 		//
 		//!!!!!!!!!!!!!!!!
 		const {msg_id,sender_id,is_bot,f_name,chat_id,
-			chat_f_name,chat_type,date,text,lang_code,photo} = this.responseToReadableMessage(message_object)
+			chat_f_name,chat_type,date,text,lang_code,photo,caption} = this.responseToReadableMessage(message_object)
 		
 
 			const d_buttons = await buttonsKeyBoard(donate_buttons)
@@ -311,8 +307,9 @@ module.exports  = {
 				            		usr_msg:text,
 				            		photo:photo_system_addres,
 				            		time:date,
+				            		caption:caption
 				            	})
-					await bot.telegram.sendPhoto(user_status,{ source: './img/'+photo_system_addres} )
+					await bot.telegram.sendPhoto(user_status, hi_res_photo)// for dending data use { source: './img/'+photo_system_addres}
 					await ctx.deleteMessage(msg_to_delete.message_id)
 					res()
 					return
@@ -329,7 +326,7 @@ module.exports  = {
 	},
 
 
-	onSticker(ctx,bot){
+	async onSticker(ctx,bot){
 		const message_object = ctx.update.message
 		
 		//!!!!!!!!!!!!!!!!
@@ -341,20 +338,18 @@ module.exports  = {
 		const {msg_id,sender_id,is_bot,f_name,chat_id,
 			chat_f_name,chat_type,date,text,lang_code,sticker} = this.responseToReadableMessage(message_object)
 	
-		return new Promise(async (res,rej)=> {
-			switch (true){
-				case start.test(text) : 
-
-					break
-				
-				case start.test(text) : 
-
-					break
-
-				default :
-
-			}
-		})
+		const user_object = await mLogic.bdGetUser(sender_id)
+		const user_status = user_object.user.chat_status	
+		const msg_to_delete = await ctx.reply('sending...')
+		await mLogic.bdOnlyUpdateMessage(sender_id,{
+				            		to:user_status,
+				            		usr_msg:text,
+				            		sticker:sticker.file_id,
+				            		time:date,
+				            		caption:caption
+				            	})
+		await bot.telegram.sendSticker(user_status,sticker.file_id)
+		await ctx.deleteMessage(msg_to_delete.message_id)
 	},
 
 
@@ -364,7 +359,30 @@ module.exports  = {
 	//				||
 	//				\/
 	//!!!!
+	async onQuery(ctx,bot){
+		const message_object = ctx.update.callback_query
+		const query_data = message_object.data
+		const sender_id = message_object.from.id
+		if(true){ // check if it amount callback query
 
+			const currency = query_data.replace(/\D+/gm,'')
+			const amount = query_data.replace(/\d+/gm,'')
+			const url = await this.createDonationUrl({sender_id,query_data})
+			const donate_board = await buttonsKeyBoard([
+					[{
+						text:'url to you',
+						url:url,
+					}]
+				])
+			if(rub_or_bucks =='rub'){
+				await mLogic.writeDonationUrl(sender_id,url,'new',amount,currency) //user_id,url,donation_status,amount,currency
+			}
+			
+			ctx.reply('donate here pls <3',donate_board)
+		}
+
+		return
+	}
 
 
 
@@ -372,40 +390,6 @@ module.exports  = {
 	//  || above		   ||
 
 
-	// SEND message methods
-
-	// deleteMsg(chat_id,msg_id){
-	// 	if(typeof chat_id !== 'string' && typeof msg_id !== 'string') throw new TypeError('all must be strings')
-	// 	this.bot.deleteMessage(chat_id,msg_id)
-	// },
-
-	// editTextMessage(new_text,chat_id,msg_id,inline_obj = {}){
-	// 	inline_obj = inline_obj.reply_markup ? inline_obj : {}
-
-	// 	if(typeof new_text !== 'string' && typeof chat_id !== 'string' && typeof msg_id !== 'string' && typeof inline_obj !== 'object') throw new TypeError('one argument or more incorrect')
-		
-	// 	this.bot.editMessageText(new_text,{chat_id,msg_id,inline_obj})
-	// },
-
-	// sendMsg(chat_id,msg_or_sticker_url,inline_obj = {}){
-	// 	inline_obj = inline_obj.reply_markup ? inline_obj : {}
-	// 	// console.log('what')
-	// 	return new Promise(async (res,rej)=>{
-	// 		try{
-	// 			new URL(msg_or_sticker_url)
-	// 			const message = await this.sendSticker(chat_id,msg_or_sticker_url,inline_obj)
-	// 			res(message)
-	// 		}
-
-	// 		catch(err){
-	// 			if (err instanceof TypeError) {
-	// 				const message = await this.sendMessage(chat_id,msg_or_sticker_url,inline_obj)
-	// 				res(message)
-	// 			}
-	// 			else throw new Error('wrong msg type')
-	// 		}
-	// 	})
-	// },
 
 	async intervalQuery(){
 		// женит двух пользователей 
