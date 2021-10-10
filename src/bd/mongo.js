@@ -235,7 +235,7 @@ module.exports = {
 
 		try{
 			const collection = db.collection(collections.bot_donation)
-		    const res = await collection.insertOne(user_object)
+		    const res = await collection.insertOne({'donation':user_object})
 
 	    } catch (err) {
 
@@ -249,6 +249,33 @@ module.exports = {
 	},
 
 	// END of writeDonationUrl
+
+
+	// START of successUrl
+
+	async successUrl(url){
+		let response,error
+		await client.connect()
+		const db = client.db(dbName)
+
+		try{
+			const collection = db.collection(collections.bot_donation)
+		    const res = await collection.findOne({'donation.url':url})
+		    if (res){
+		    	
+		    }
+	    } catch (err) {
+
+	        error = err
+	    } finally {
+
+	        await client.close()
+
+	        return response
+	    }
+	},
+
+	// END of successUrl
 
 	
 	// START of configCheck
