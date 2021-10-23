@@ -223,12 +223,27 @@ module.exports = {
 
 	async writeDonationUrl(user_id,url,donation_status,amount,currency){
 		let response,error
+		function a(str) {
+			let hash = 0, i, chr
+			const d = new Date().valueOf()
+			if (str.length === 0) return hash
+			for (i = 0; i < str.length; i++) {
+		    	chr   = str.charCodeAt(i)+d
+		    	hash  = ((hash << 5) - hash) + chr
+				hash |= 0 // Convert to 32bit integer
+			}
+			return hash
+		}
+		const donation = '/r/'+a(url).toString().replace(/-/g,'w').replace(/0/g,'g').replace(/2/g,'U')
+		const succses = '/s/'+donation.replace('/r/','')+'s'
 		const user_object = {
 			'user_id' : user_id,
 			'url' : url,
-			'donation_status' : donation_status,
+			'donation_status' : donation_status, // created || done 
 			'amount' : amount,
 			'currency' : currency,
+			'donation_url' : donation,
+			'succses_url' : succses,
 		}
 		await client.connect()
 		const db = client.db(dbName)
@@ -251,19 +266,17 @@ module.exports = {
 	// END of writeDonationUrl
 
 
-	// START of successUrl
+	// START of getDonationUrl
 
-	async successUrl(url){
+	async getDonationUrl(url){
 		let response,error
 		await client.connect()
 		const db = client.db(dbName)
 
 		try{
 			const collection = db.collection(collections.bot_donation)
-		    const res = await collection.findOne({'donation.url':url})
-		    if (res){
-		    	
-		    }
+		    const res = await collection.findOne({'donation.donation_url':url,'donation.status':'new'})
+		    response = res.donation
 	    } catch (err) {
 
 	        error = err
@@ -275,7 +288,31 @@ module.exports = {
 	    }
 	},
 
-	// END of successUrl
+	// END of getDonationUrl
+
+	// START of getSuccessUrl
+
+	async getSuccessUrl(url){
+		let response,error
+		await client.connect()
+		const db = client.db(dbName)
+
+		try{
+			const collection = db.collection(collections.bot_donation)
+		    const res = await collection.findOneAndUpdate({'donation.succses_url':url},{$set: {'donation_status': 'donated'}})
+		    response = 'OK'
+	    } catch (err) {
+
+	        error = err
+	    } finally {
+
+	        await client.close()
+
+	        return response
+	    }
+	},
+
+	// END of getSuccessUrl
 
 	
 	// START of configCheck
