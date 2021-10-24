@@ -44,6 +44,28 @@ module.exports = {
 	// END of bdGetUser
 
 
+	// START of bdUpdateUserPhotoStatus
+
+	async bdUpdateUserPhotoStatus(user_id,vip_time){
+		let response,error
+		await client.connect()
+		const db = client.db(dbName)
+		try{
+	        const collection = db.collection(collections.bot_users)
+	        const res = await collection.findOneAndUpdate({'user.id':user_id},{$set: {'user.vip': vip_time} } )
+	        // console.log(res.user.conversations_with.bot)
+	        response = res
+	    } catch (err) {
+	        error = err
+	    } finally {
+	        await client.close()
+	        return response
+	    }
+	},
+
+	// END of bdUpdateUserPhotoStatus
+
+
 	// START of bdAddUser
 
 	async bdAddUser(user_object){
@@ -251,10 +273,10 @@ module.exports = {
 		try{
 			const collection = db.collection(collections.bot_donation)
 		    const res = await collection.insertOne({'donation':user_object})
-
+		    response = donation
 	    } catch (err) {
 
-	        error = err
+	        response = err
 	    } finally {
 
 	        await client.close()
@@ -275,11 +297,11 @@ module.exports = {
 
 		try{
 			const collection = db.collection(collections.bot_donation)
-		    const res = await collection.findOne({'donation.donation_url':url,'donation.status':'new'})
+		    const res = await collection.findOne({'donation.donation_url':url,'donation.donation_status':'new'})
 		    response = res.donation
 	    } catch (err) {
 
-	        error = err
+	        response = err
 	    } finally {
 
 	        await client.close()
@@ -299,8 +321,8 @@ module.exports = {
 
 		try{
 			const collection = db.collection(collections.bot_donation)
-		    const res = await collection.findOneAndUpdate({'donation.succses_url':url},{$set: {'donation_status': 'donated'}})
-		    response = 'OK'
+		    const res = await collection.findOneAndUpdate({'donation.succses_url':url},{$set: {'donation.donation_status': 'donated'}})
+		    response = res.value.donation
 	    } catch (err) {
 
 	        error = err
