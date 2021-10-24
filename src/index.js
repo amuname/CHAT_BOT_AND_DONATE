@@ -16,9 +16,9 @@ Bot.on('text',
 Bot.on(['photo'],
 	(ctx)=>setTimeout(botFuncs.onPhoto.bind(botFuncs,ctx,Bot),3000)
 )
-// Bot.on('sticker',
-// 	(ctx)=>botFuncs.onSticker(ctx,Bot)
-// )
+Bot.on('sticker',
+	(ctx)=>botFuncs.onSticker(ctx,Bot)
+)
 Bot.on('callback_query',
 	(ctx)=>botFuncs.onQuery(ctx,Bot)
 )
