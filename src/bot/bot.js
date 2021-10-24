@@ -128,6 +128,7 @@ module.exports  = {
 		return new Promise(async (res,rej)=> {
 			const start_keyboard = await buttonsKeyBoard(start_buttons)
 			const leave_butt = await buttonsKeyBoard(leave_buttons)
+			console.log(leave_butt)
 			const start_regexp = /\/start .\d+/,
 			start = /\/start/
 
@@ -137,22 +138,22 @@ module.exports  = {
 			// console.log(user_status)
 
 			switch (true){
-				case /*start.test(text)*/ !user_object : 
+				// case /*start.test(text)*/ !user_object : 
 
-					// if(user_status =='in_queue'){
-					// 	return res(await bot.telegram.sendMessage(sender_id,'use buttons to leave queue or chat',leave_butt))
-					// }
-					// if(!user_status){
-					return res(await bot.telegram.sendMessage(sender_id,'Choose bot language', await buttonsKeyBoard(lang_buttons)))
-					// }
+				// 	// if(user_status =='in_queue'){
+				// 	// 	return res(await bot.telegram.sendMessage(sender_id,'use buttons to leave queue or chat',leave_butt))
+				// 	// }
+				// 	// if(!user_status){
+				// 	return res(await bot.telegram.sendMessage(sender_id,'Choose bot language', await buttonsKeyBoard(lang_buttons)))
+				// 	// }
 					 
 							
-					break
+				// 	break
 				case start_regexp.test(text) && user_status =='bot' : 
 							//
 							//
 					break
-				case /ru/.test(text) && !user_object || /en/.test(text) && !user_object : 
+				case start.test(text) && !user_status || /en/.test(text) && !user_object : 
 							const dbStartResponse =await mLogic.bdAddUser({
 							user:{
 								id:sender_id,
@@ -247,10 +248,10 @@ module.exports  = {
 				// DONATION
 				//
 				case /donate for VIP status/.test(text) && /bot/.test(user_status) :
-					const oobject_values = await configFind(user_lang)
-					const leave_butt = await inlineButtonsKeyBoard(donateButtons(user_lang,))
+					// const oobject_values = await configFind(user_lang)
+					// const leave_butt = await inlineButtonsKeyBoard(donateButtons(user_lang,))
 
-					res(await bot.telegram.sendMessage(sender_id,``,leave_butt))
+					res(await bot.telegram.sendMessage(sender_id,`nones`,leave_butt))
 
 					break
 				default :
@@ -295,8 +296,9 @@ module.exports  = {
 		const {msg_id,sender_id,is_bot,f_name,chat_id,
 			chat_f_name,chat_type,date,text,lang_code,photo,caption} = this.responseToReadableMessage(message_object)
 		
-
-			const d_buttons = await buttonsKeyBoard(donate_buttons)
+			const donate_object = await mLogic.configFind('rub')
+			const donate_buttons = await donateButtons('rub',donate_object)
+			const d_buttons = await inlineButtonsKeyBoard(donate_buttons)
 			console.log('for photos AYAYAYA',sender_id)
 			const user_object = await mLogic.bdGetUser(sender_id)
 			if(!user_object){
@@ -308,7 +310,7 @@ module.exports  = {
 			const user_status = user_object.user.chat_status
 			// console.log('vip_status => %s\r\nuser_status => %s\r\nuser %s',vip_status,user_status,user)
 			switch (true){
-				case new Date(vip_status) <= new Date() && /^\d+$/.test(user_status) : 	//gona be >= not <=
+				case new Date(vip_status) >= new Date() && /^\d+$/.test(user_status) : 	//gona be >= not <=
 					console.log('VIP STATUS')
 					// photo with caption/text need to send text to another user
 					// like message or msg with photo
@@ -330,7 +332,7 @@ module.exports  = {
 				default :
 				await bot.telegram.sendMessage(sender_id,'You can`t send photo\n to another user or bot,\
 				\nuse /help command to understand\
-				\nuse /vip to donate ',inlineButtonsKeyBoard)
+				\nuse /vip to donate ',d_buttons)
 				res()  
 				// return
 			}
@@ -349,7 +351,7 @@ module.exports  = {
 		//!!!!!!!!!!!!!!!!
 
 		const {msg_id,sender_id,is_bot,f_name,chat_id,
-			chat_f_name,chat_type,date,text,lang_code,sticker} = this.responseToReadableMessage(message_object)
+			chat_f_name,chat_type,date,text,lang_code,sticker,caption} = this.responseToReadableMessage(message_object)
 	
 		const user_object = await mLogic.bdGetUser(sender_id)
 		const user_status = user_object.user.chat_status	
@@ -359,7 +361,7 @@ module.exports  = {
 				            		usr_msg:text,
 				            		sticker:sticker.file_id,
 				            		time:date,
-				            		caption:caption
+				            		caption:caption || '',
 				            	})
 		await bot.telegram.sendSticker(user_status,sticker.file_id)
 		await ctx.deleteMessage(msg_to_delete.message_id)
@@ -375,26 +377,31 @@ module.exports  = {
 	async onQuery(ctx,bot){
 		const message_object = ctx.update.callback_query
 		const query_data = message_object.data
+		// console.log(query_data)
 		const sender_id = message_object.from.id
 		if(/donation_.*/.test(query_data)){ // check if it amount callback query
 
 			const currency = query_data.replace(/\D+/gm,'')
-			const amount = query_data.replace(/\d+/gm,'')
+			const amount = query_data
+			console.log(amount)
 			const url = await this.createDonationUrl({sender_id,query_data})
-			const donate_board = await buttonsKeyBoard([
-					[{
-						text:'url to you',
-						url:url,
-					}]
-				])
-			if(rub_or_bucks =='rub'){
-				await mLogic.writeDonationUrl(sender_id,url,'new',amount,currency) //user_id,url,donation_status,amount,currency
+			console.log(url)
+			if(query_data.includes('rub') ){
+				let a = await mLogic.writeDonationUrl(sender_id,url.replace('https://','').replace('http://',''),'new',amount,currency) //user_id,url,donation_status,amount,currency
+				console.log(a)
+				const ur_r = 'http://127.1.1.1:3000'+a/*.replace('https://','').replace('http://','').replace('localhost','127.1.1.1')*/
+				const donate_board = await inlineButtonsKeyBoard([
+						[{
+							text:'url to you',
+							url:ur_r,
+						}]
+					])
+			ctx.reply('donate here pls <3',donate_board)
 			}
 			
-			ctx.reply('donate here pls <3',donate_board)
 		}
 
-	}
+	},
 
 
 
@@ -416,6 +423,10 @@ module.exports  = {
 	},	
 
 	denyMsg(ctx,bot){
+		const message_object = ctx.update.message
+
+		const {msg_id,sender_id,is_bot,f_name,chat_id,
+			chat_f_name,chat_type,date,text,lang_code,sticker} = this.responseToReadableMessage(message_object)
 		return new Promise( async (res,rej)=>{
 			const start_keyboard = await buttonsKeyBoard(start_buttons)
 			res(await bot.telegram.sendMessage(sender_id,'Use buttons or /help command',start_keyboard))
