@@ -81,7 +81,7 @@ const buttonBuilder = {
 			const phrase = Object.keys(object_values)[i].replace(/_/,' ') 
 			array_of_buttons[i] = {
 				text : phrase,
-				callback_data :`${Object.values(object_values)[i]}  ${currency}`,
+				callback_data :`donation_${Object.keys(object_values)[i]}_${Object.values(object_values)[i]}_${currency}`,
 			}
 		}
 		return [array_of_buttons]
