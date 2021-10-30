@@ -389,7 +389,7 @@ module.exports  = {
 			if(query_data.includes('rub') ){
 				let a = await mLogic.writeDonationUrl(sender_id,url.replace('https://','').replace('http://',''),'new',amount,currency) //user_id,url,donation_status,amount,currency
 				console.log(a)
-				const ur_r = 'http://127.1.1.1:3000'+a/*.replace('https://','').replace('http://','').replace('localhost','127.1.1.1')*/
+				const ur_r = serverUrl+a/*.replace('https://','').replace('http://','').replace('localhost','127.1.1.1')*/
 				const donate_board = await inlineButtonsKeyBoard([
 						[{
 							text:'url to you',
