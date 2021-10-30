@@ -36,6 +36,7 @@ app.get(/s\/.+s/,async(req,res,next)=>{
 	console.log(a)
 	if(a) await bot.sendMessage(r.user_id,'thank for donation!') 
 	// console.log(r)
+	// res.redirect(301, redirect)
 	res.send('thanks')
 })
 
