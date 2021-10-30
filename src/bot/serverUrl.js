@@ -1,1 +1,1 @@
-module.exports = serverUrl = 'http://localhost:3000'
+module.exports = serverUrl = 'http://127.1.1.1:3000'
