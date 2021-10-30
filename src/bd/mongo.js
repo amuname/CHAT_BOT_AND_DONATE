@@ -321,7 +321,7 @@ module.exports = {
 
 		try{
 			const collection = db.collection(collections.bot_donation)
-		    const res = await collection.findOneAndUpdate({'donation.succses_url':url},{$set: {'donation.donation_status': 'donated'}})
+		    const res = await collection.findOneAndUpdate({'donation.succses_url':url},{$set: {'donation.donation_status': 'donated','donation.succses_url':null}})
 		    response = res.value.donation
 	    } catch (err) {
 
